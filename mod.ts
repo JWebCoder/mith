@@ -1,35 +1,41 @@
-import debug from 'https://deno.land/x/debuglog/debug.ts'
-import { serve, ServerRequest, Response as DenoResponse } from "https://deno.land/std/http/server.ts";
+import { serve, ServerRequest, Response as DenoResponse, Server } from "https://deno.land/std@0.50.0/http/server.ts";
 
-const { env } = Deno
-const logger = debug('*')
+export type NextFunction = (err?: any) => void
 
-type NextFunction = (err?: any) => void
-
-type middleware = (request: ServerRequest, response: Response, next: NextFunction) => void 
+export type middleware = (request: ServerRequest, response: Response, next: NextFunction) => void 
 
 export type listenOptions = { port?: number}
 
 export interface Response extends DenoResponse {
-  body?: any
+  error?: any
+  body: any
   headers: Headers
+  [key: string]: any
 }
 
-
 export default class Mith {
-  
   private middlewareArray: middleware[] = []
   private PORT = 8000
-  
+  private server?: Server
   public use(middleware: middleware) {
     this.middlewareArray.push(middleware)
   }
   
-
   public async listen(options: listenOptions) {
-    const server = serve({ port: options.port || this.PORT });
-    for await (const req of server) {
-      this.runMiddleware(req, this.buildResponse())
+    this.server = serve({ port: options.port || this.PORT });
+    this.setupListener()
+    return 
+  }
+
+  public close() {
+    this.server?.close()
+  }
+
+  private async setupListener() {
+    if (this.server) {
+      for await (const req of this.server) {
+        this.runMiddleware(req, this.buildResponse())
+      }
     }
   }
 
@@ -43,6 +49,7 @@ export default class Mith {
       response,
       async (error?: any): Promise<void> => {
         if (error) {
+          response.error = error
           await this.dispatch(request, response, this.middlewareArray.length - 1)
         } else if (index + 1 < this.middlewareArray.length) {
           await this.dispatch(request, response, index + 1)
@@ -60,33 +67,13 @@ export default class Mith {
       }
       response.body = JSON.stringify(response.body)
     }
-    request.respond(response)
+    request.respond(response).catch((e) => {console.log('error', e)})
   }
 
   private buildResponse(): Response {
     return {
+      body: {},
       headers: new Headers()
     }
   }
 }
-
-const app = new Mith();
-app.use(
-  (req, res, next) => {
-    res.body = {
-      test: 'hello'
-    }
-    next()
-  }
-)
-app.use(
-  (req, res, next) => {
-    res.body.testing = 'world'
-    next()
-  }
-)
-
-const PORT = Number(env.get('PORT')) || 8000
-
-logger('listening on %s', PORT)
-await app.listen({ port: PORT})
