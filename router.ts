@@ -1,16 +1,16 @@
-import { middleware, Response, NextFunction } from "./mod.ts";
-import { ServerRequest } from "https://deno.land/std@0.50.0/http/server.ts";
+import { Middleware, Response, NextFunction } from "./mod.ts";
+import { ServerRequest } from "https://deno.land/std@0.51.0/http/server.ts";
 import { match, MatchFunction } from 'https://raw.githubusercontent.com/pillarjs/path-to-regexp/master/src/index.ts'
 import { getStatePath, setStatePath, deleteStatePath } from './routerState.ts'
 
-declare module "https://deno.land/std@0.50.0/http/server.ts" {
+declare module "https://deno.land/std@0.51.0/http/server.ts" {
     interface ServerRequest {
       params: Object
     }
 }
 
 
-interface routerMiddleware extends middleware {
+interface RouterMiddleware extends Middleware {
   isRouter: boolean
 }
 
@@ -20,7 +20,7 @@ export default class Router {
   private paths: {
     [key in methods]: {
       [key: string]: {
-        middleware: middleware | routerMiddleware,
+        middleware: Middleware | RouterMiddleware,
         isRouter: boolean,
         matcher: MatchFunction
       }
@@ -32,7 +32,7 @@ export default class Router {
     PATCH: {},
   }
 
-  private keys: {
+  private savedPaths: {
     [key in methods]: string[]
   } = {
     GET: [],
@@ -41,24 +41,24 @@ export default class Router {
     PATCH: [],
   }
 
-  use(method: methods, path: string, middleware: middleware | routerMiddleware) {
-    const isRouter = (middleware as routerMiddleware).isRouter
+  use(method: methods, path: string, middleware: Middleware | RouterMiddleware) {
+    const isRouter = (middleware as RouterMiddleware).isRouter
     this.paths[method][path] = {
       middleware,
       isRouter,
-      matcher: match(path, { end: !(middleware as routerMiddleware).isRouter })
+      matcher: match(path, { end: !(middleware as RouterMiddleware).isRouter })
     }
-    this.keys[method] = Object.keys(this.paths[method])
+    this.savedPaths[method] = Object.keys(this.paths[method])
   }
 
-  getRoutes(): routerMiddleware {
-    const router: routerMiddleware = (req: ServerRequest, res: Response, next: NextFunction) => {
+  getRoutes(): RouterMiddleware {
+    const router: RouterMiddleware = (req: ServerRequest, res: Response, next: NextFunction) => {
       let matchedRoute = false
       res.noMatch = true
       const connectionId = req.conn.rid
       const statePath = getStatePath(req.conn.rid)
-      for (const path of this.keys[req.method as methods]) {
-        const route = this.paths[req.method as methods][path]
+      for (const savedPath of this.savedPaths[req.method as methods]) {
+        const route = this.paths[req.method as methods][savedPath]
         
         const matched = route.matcher(req.url.replace(statePath, ''))
         if (matched) {

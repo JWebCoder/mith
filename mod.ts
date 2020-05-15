@@ -1,8 +1,8 @@
-import { serve, ServerRequest, Response as DenoResponse, Server } from "https://deno.land/std@0.50.0/http/server.ts";
+import { serve, ServerRequest, Response as DenoResponse, Server } from "https://deno.land/std@0.51.0/http/server.ts";
 
 export type NextFunction = (err?: any) => void
 
-export type middleware = (request: ServerRequest, response: Response, next: NextFunction) => void 
+export type Middleware = (request: ServerRequest, response: Response, next: NextFunction) => void 
 
 export type listenOptions = { port?: number}
 
@@ -14,10 +14,10 @@ export interface Response extends DenoResponse {
 }
 
 export default class Mith {
-  private middlewareArray: middleware[] = []
+  private middlewareArray: Middleware[] = []
   private PORT = 8000
   private server?: Server
-  public use(middleware: middleware) {
+  public use(middleware: Middleware) {
     this.middlewareArray.push(middleware)
   }
   
@@ -67,7 +67,7 @@ export default class Mith {
       }
       response.body = JSON.stringify(response.body)
     }
-    request.respond(response).catch((e) => {console.log('error', e)})
+    request.respond(response).catch((e) => {})
   }
 
   private buildResponse(): Response {

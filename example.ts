@@ -1,6 +1,7 @@
 import { debug } from './deps.ts'
 import Mith from './mod.ts'
 import Router from './router.ts'
+import { cookieSession, cookieSessionSave } from './cookieSession.ts'
 const { env } = Deno
 const logger = debug('*')
 
@@ -36,8 +37,6 @@ deepRouter.use(
     next()
   }  
 )
-
-const app = new Mith();
 
 router.use(
   'GET',
@@ -79,12 +78,39 @@ router.use(
 
 router.use(
   'GET',
+  '/session',
+  (req, res, next) => {
+    if (!req.session.test && req.session.test !== 0) {
+      req.session.test = -1
+    }
+    req.session.test += 1
+    res.body.test = req.session
+    next()
+  }
+)
+
+router.use(
+  'GET',
+  '/close',
+  (req, res, next) => {
+    app.close()
+    res.body = 'closed'
+    next()
+  }
+)
+
+router.use(
+  'GET',
   '/',
   innerRouter.getRoutes()
 )
 
-app.use(router.getRoutes())
+const app = new Mith();
 
+app.use(cookieSession({
+  secret:'stuff'
+}))
+app.use(router.getRoutes())
 app.use(
   (req, res, next) => {
     if (res.error) {
@@ -97,6 +123,7 @@ app.use(
     next()
   }
 )
+app.use(cookieSessionSave())
 
 const PORT = Number(env.get('PORT')) || 8000
 
