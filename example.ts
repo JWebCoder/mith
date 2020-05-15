@@ -1,7 +1,7 @@
 import { debug } from './deps.ts'
 import Mith from './mod.ts'
 import Router from './router.ts'
-import { cookieSession, cookieSessionSave } from './cookieSession.ts'
+import { cookieSession } from './cookieSession.ts'
 const { env } = Deno
 const logger = debug('*')
 
@@ -78,13 +78,25 @@ router.use(
 
 router.use(
   'GET',
-  '/session',
+  '/test1',
   (req, res, next) => {
     if (!req.session.test && req.session.test !== 0) {
       req.session.test = -1
     }
     req.session.test += 1
     res.body.test = req.session
+    next()
+  }
+)
+
+router.use(
+  'GET',
+  '/test2',
+  (req, res, next) => {
+    req.session.test = {
+      stuff: 1
+    }
+    res.body.test = 'tested'
     next()
   }
 )
@@ -123,7 +135,6 @@ app.use(
     next()
   }
 )
-app.use(cookieSessionSave())
 
 const PORT = Number(env.get('PORT')) || 8000
 

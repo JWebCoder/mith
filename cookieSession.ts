@@ -6,6 +6,7 @@
 
 import { ServerRequest } from "https://deno.land/std@0.51.0/http/server.ts"
 import { setCookie, getCookies } from "https://deno.land/std@0.51.0/http/cookie.ts"
+import { v4 } from "https://deno.land/std@0.51.0/uuid/mod.ts";
 import { Middleware, Response, NextFunction } from "./mod.ts"
 import debug from 'https://deno.land/x/debuglog/debug.ts'
 let logger = debug('cookie_session')
@@ -76,7 +77,29 @@ export function cookieSession (options: options): Middleware {
     if (authString) {
       authData = JSON.parse(authString)
     }
-    req.session = authData
+    if (!authData.id) {
+      authData.id = v4.generate()
+    }
+    const handler = {
+      get: (target: {[key: string]: any}, property: string): any => {1
+        if (typeof target[property] === 'object' && target[property] !== null) {
+          return new Proxy(target[property], handler)
+        } else {
+          return target[property];
+        }
+      },
+      set: (target: {[key: string]: any}, property: string, newValue: any) => {
+        target[property] = newValue
+        setCookie(res, {
+          name: (configurationOptions.name as string),
+          value: JSON.stringify(req.session),
+          ...configurationOptions
+        })
+        return true
+      }
+    }
+
+    req.session = new Proxy(authData, handler)
     next()
   }
 }
