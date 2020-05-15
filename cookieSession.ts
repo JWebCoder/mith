@@ -7,7 +7,7 @@
 import { ServerRequest } from "https://deno.land/std@0.51.0/http/server.ts"
 import { setCookie, getCookies } from "https://deno.land/std@0.51.0/http/cookie.ts"
 import { v4 } from "https://deno.land/std@0.51.0/uuid/mod.ts";
-import { Middleware, Response, NextFunction } from "./mod.ts"
+import { Middleware, Response, NextFunction } from "https://raw.githubusercontent.com/JWebCoder/mith/master/mod.ts"
 import debug from 'https://deno.land/x/debuglog/debug.ts'
 let logger = debug('cookie_session')
 
@@ -68,7 +68,7 @@ export function cookieSession (options: options): Middleware {
   
   logger('session options %j', configurationOptions) 
 
-  return async (req: ServerRequest, res: Response, next: NextFunction) => {
+  return (req: ServerRequest, res: Response, next: NextFunction) => {
     logger('running')
     let authString = getCookies(req)[(configurationOptions.name as string)]
     

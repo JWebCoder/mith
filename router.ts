@@ -1,4 +1,4 @@
-import { Middleware, Response, NextFunction } from "./mod.ts";
+import { Middleware, Response, NextFunction } from "https://raw.githubusercontent.com/JWebCoder/mith/master/mod.ts";
 import { ServerRequest } from "https://deno.land/std@0.51.0/http/server.ts";
 import { match, MatchFunction } from 'https://raw.githubusercontent.com/pillarjs/path-to-regexp/master/src/index.ts'
 import { getStatePath, setStatePath, deleteStatePath } from './routerState.ts'

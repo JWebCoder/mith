@@ -21,7 +21,7 @@ export default class Mith {
     this.middlewareArray.push(middleware)
   }
   
-  public async listen(options: listenOptions) {
+  public listen(options: listenOptions) {
     this.server = serve({ port: options.port || this.PORT });
     this.setupListener()
     return 

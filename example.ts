@@ -138,7 +138,7 @@ app.use(
 
 const PORT = Number(env.get('PORT')) || 8000
 
-await app.listen({ port: PORT})
+app.listen({ port: PORT})
 logger('listening on %s', PORT)
 
 
