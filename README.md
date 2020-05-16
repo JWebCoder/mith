@@ -35,7 +35,7 @@ app.listen({ port: PORT})
 console.log('listening on', PORT)
 ```
 
-Right now i still need to create the documentation, so you can check the **example.ts** file for full usage examples
+Right now i'm still working on the documentation, so you can check the **example** folder for full usage examples
 
 ## Available middlewares
 

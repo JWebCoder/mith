@@ -5,7 +5,9 @@ import { getStatePath, setStatePath, deleteStatePath } from './routerState.ts'
 
 declare module "https://deno.land/std@0.51.0/http/server.ts" {
     interface ServerRequest {
-      params: Object
+      params: {
+        [key: string]: any
+      }
     }
 }
 
