@@ -35,11 +35,12 @@ app.listen({ port: PORT})
 console.log('listening on', PORT)
 ```
 
-Right now i'm still working on the documentation, so you can check the **example** folder for full usage examples
+Right now I'm still working on the documentation, so you can check the **example** folder for full usage examples
 
 ## Available middlewares
 
 - **router.ts** - router middleware
+- **cookieSession.ts** - session middleware using cookies (WIP)
 - **cookieSession.ts** - session middleware using cookies (WIP)
 
 **Note:** These middlewares will eventually move to their own repositories to split responsibilities and improve maintenance
