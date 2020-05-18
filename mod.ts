@@ -1,17 +1,18 @@
-import { serve, ServerRequest, Response as DenoResponse, Server } from "https://deno.land/std@0.51.0/http/server.ts";
+import { serve, ServerRequest, Response as DenoResponse, Server, HTTPOptions } from "https://deno.land/std@0.51.0/http/server.ts";
 
 export type NextFunction = (err?: any) => void
 
 export type Middleware = (request: ServerRequest, response: Response, next: NextFunction) => void 
-
-export type listenOptions = { port?: number}
 
 export interface Response extends DenoResponse {
   error?: any
   body: any
   headers: Headers
   finished: boolean
-  [key: string]: any
+  sendResponse: boolean
+  sent: boolean
+  send: () => void
+  end: () => void
 }
 
 export default class Mith {
@@ -22,16 +23,41 @@ export default class Mith {
     this.middlewareArray.push(middleware)
   }
   
-  public listen(options: listenOptions) {
-    this.server = serve({ port: options.port || this.PORT });
+  /**
+   * Create an HTTP server with given options
+   *
+   *  const options = {
+   *    hostname: "localhost",
+   *    port: 8000,
+   *  }
+   * 
+   *  mith.listen(options)
+   *
+   * @param options Server configuration
+   * @return void
+   */
+  public listen(options: string | HTTPOptions = { port: this.PORT }) {
+    this.server = serve(options)
     this.setupListener()
     return 
   }
+
+  /**
+   * Closes the ongoing server
+   *
+   *  mith.close()
+   *
+   */
 
   public close() {
     this.server?.close()
   }
 
+  /**
+   * Listens to the async iterable server instance for incoming requests
+   * Runs the stack of middleware for each request
+   *
+   */
   private async setupListener() {
     if (this.server) {
       for await (const req of this.server) {
@@ -39,6 +65,7 @@ export default class Mith {
       }
     }
   }
+
 
   private runMiddleware(request: ServerRequest, response: Response) {
     this.dispatch(request, response, 0)
@@ -50,36 +77,42 @@ export default class Mith {
       response,
       (error?: any): void => {
         if (response.finished) {
-          return this.sendResponse(request, response)
+          return
         }
         if (error) {
           response.error = error
           this.dispatch(request, response, this.middlewareArray.length - 1)
         } else if (index + 1 < this.middlewareArray.length) {
           this.dispatch(request, response, index + 1)
-        } else {
-          this.sendResponse(request, response)
         }
       }
     )
   }
 
-  private sendResponse(request: ServerRequest, response: Response) {
-    if (typeof response.body === 'object') {
-      if (!response.headers.get('content-type')) {
-        response.headers.set('content-type', 'application/json')
+  private async sendResponse(request: ServerRequest, response: Response) {
+    if (!response.sent) {
+      response.sent = true
+      if (typeof response.body === 'object') {
+        if (!response.headers.get('content-type')) {
+          response.headers.set('content-type', 'application/json')
+        }
+        response.body = JSON.stringify(response.body)
       }
-      response.body = JSON.stringify(response.body)
+      await request.respond(response).catch((e) => {console.log(e)})
     }
-    request.respond(response).catch((e) => {console.log(e)})
   }
 
   private buildResponse(req: ServerRequest): Response {
     const newResponse = {
       body: {},
       headers: new Headers(),
+      sendResponse: false,
       finished: false,
-      send: () => {
+      sent: false,
+      send: async () => {
+        await this.sendResponse(req, newResponse)
+      },
+      end: () => {
         newResponse.finished = true
       }
     }

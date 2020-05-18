@@ -5,10 +5,10 @@
  */
 
 import { ServerRequest } from "https://deno.land/std@0.51.0/http/server.ts"
-import { readFileStrSync } from "https://deno.land/std@0.51.0/fs/read_file_str.ts";
+import { readFileStrSync } from "https://deno.land/std@0.51.0/fs/mod.ts";
 import { sep, normalize, extname } from "https://deno.land/std@0.51.0/path/mod.ts"
 import { contentType } from "https://deno.land/x/media_types@v2.3.1/mod.ts";
-import { Middleware, Response, NextFunction } from "https://raw.githubusercontent.com/JWebCoder/mith/master/mod.ts"
+import { Middleware, Response, NextFunction } from "./mod.ts"
 import debug from 'https://deno.land/x/debuglog/debug.ts'
 let logger = debug('static')
 
@@ -71,7 +71,6 @@ export function serveStatic (root: string, options: options = {}): Middleware {
   
   return async (req: ServerRequest, res: Response, next: NextFunction) => {
     logger('running')
-
     if (req.method !== 'GET' && req.method !== 'HEAD') {
       if (fallthrough) {
         return next()
@@ -132,10 +131,9 @@ export function serveStatic (root: string, options: options = {}): Middleware {
     }
    
     res.body = readFileStrSync(path, { encoding: "utf8" })
-    res.send()
+    await res.send()
     next()
   }
 }
-
 
 serveStatic('./test')

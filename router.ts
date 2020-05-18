@@ -11,7 +11,6 @@ declare module "https://deno.land/std@0.51.0/http/server.ts" {
     }
 }
 
-
 interface RouterMiddleware extends Middleware {
   isRouter: boolean
 }

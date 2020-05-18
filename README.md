@@ -26,7 +26,7 @@ router.use(
   }
 )
 
-const app = new Mith();
+const app = new Mith()
 
 app.use(router.getRoutes())
 
