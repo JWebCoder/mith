@@ -10,6 +10,7 @@ export interface Response extends DenoResponse {
   error?: any
   body: any
   headers: Headers
+  finished: boolean
   [key: string]: any
 }
 
@@ -34,7 +35,7 @@ export default class Mith {
   private async setupListener() {
     if (this.server) {
       for await (const req of this.server) {
-        this.runMiddleware(req, this.buildResponse())
+        this.runMiddleware(req, this.buildResponse(req))
       }
     }
   }
@@ -43,16 +44,19 @@ export default class Mith {
     this.dispatch(request, response, 0)
   }
 
-  private async dispatch (request: ServerRequest, response: Response, index: number): Promise<void> {
+  private dispatch (request: ServerRequest, response: Response, index: number): void {
     this.middlewareArray[index](
       request,
       response,
-      async (error?: any): Promise<void> => {
+      (error?: any): void => {
+        if (response.finished) {
+          return this.sendResponse(request, response)
+        }
         if (error) {
           response.error = error
-          await this.dispatch(request, response, this.middlewareArray.length - 1)
+          this.dispatch(request, response, this.middlewareArray.length - 1)
         } else if (index + 1 < this.middlewareArray.length) {
-          await this.dispatch(request, response, index + 1)
+          this.dispatch(request, response, index + 1)
         } else {
           this.sendResponse(request, response)
         }
@@ -67,13 +71,18 @@ export default class Mith {
       }
       response.body = JSON.stringify(response.body)
     }
-    request.respond(response).catch((e) => {})
+    request.respond(response).catch((e) => {console.log(e)})
   }
 
-  private buildResponse(): Response {
-    return {
+  private buildResponse(req: ServerRequest): Response {
+    const newResponse = {
       body: {},
-      headers: new Headers()
+      headers: new Headers(),
+      finished: false,
+      send: () => {
+        newResponse.finished = true
+      }
     }
+    return  newResponse
   }
 }

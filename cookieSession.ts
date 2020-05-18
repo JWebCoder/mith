@@ -104,7 +104,6 @@ export function cookieSession (options: options): Middleware {
   }
 }
 
-
 export function cookieSessionSave (): Middleware {
   return async (req, res, next) => {
     logger('Saving session %O', )

@@ -1,4 +1,4 @@
-import { debug, Mith, cookieSession } from './deps.ts'
+import { debug, Mith, cookieSession, serveStatic, resolve } from './deps.ts'
 import rootRouter from './routes/root.ts'
 
 const { env } = Deno
@@ -8,6 +8,9 @@ const app = new Mith()
 
 app.use(cookieSession({
   secret:'stuff'
+}))
+app.use(serveStatic(resolve(Deno.cwd(), 'static'), {
+  maxage: 120
 }))
 app.use(rootRouter.getRoutes())
 app.use(
