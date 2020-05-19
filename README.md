@@ -15,7 +15,7 @@ Differently from Express, the main Mith application is only responsible to handl
 **Basic integration with routing**
 ```typescript
 import Mith from 'https://deno.land/x/mith@v0.1.0/mod.ts'
-import Router from 'https://deno.land/x/mith-router@v0.0.1/mod.ts'
+import Router from 'https://deno.land/x/mith_router@v0.0.1/mod.ts'
 
 const { env } = Deno
 
@@ -43,7 +43,7 @@ Right now I'm still working on the documentation, so you can check the **example
 
 ## Available middlewares
 
-- **[mith-router](https://github.com/JWebCoder/mith-router)** - router middleware
+- **[mith_router](https://github.com/JWebCoder/mith_router)** - router middleware
 - **cookieSession.ts** - session middleware using cookies
 - **static.ts** - static file server (WIP)
 
