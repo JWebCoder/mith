@@ -8,7 +8,7 @@ Differently from Express, the main Mith application is only responsible to handl
 
 ## Deno documentation
 
-[doc.deno.land/mith](https://doc.deno.land/https/deno.land/x/mith@v0.1.0/mod.ts)
+[doc.deno.land/mith](https://doc.deno.land/https/deno.land/x/mith/mod.ts)
 
 ## Usage
 
