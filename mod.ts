@@ -15,6 +15,9 @@ export interface Response extends DenoResponse {
   end: () => void
 }
 
+/** A class which registers middleware (via `.use()`) and then processes
+ * inbound requests against that middleware (via `.listen()`).
+ */
 export class Mith {
   private middlewareArray: Middleware[] = []
   private PORT = 8000
