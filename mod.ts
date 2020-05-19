@@ -15,7 +15,7 @@ export interface Response extends DenoResponse {
   end: () => void
 }
 
-export default class Mith {
+export class Mith {
   private middlewareArray: Middleware[] = []
   private PORT = 8000
   private server?: Server
@@ -83,6 +83,7 @@ export default class Mith {
       response,
       (error?: any): void => {
         if (response.finished) {
+          this.sendResponse(request, response)
           return
         }
         if (error) {
