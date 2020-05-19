@@ -9,8 +9,8 @@ const app = new Mith()
 app.use(cookieSession({
   secret:'stuff'
 }))
-app.use(serveStatic(resolve(Deno.cwd(), 'static'), {
-  maxage: 120
+app.use(serveStatic(resolve(Deno.cwd(), 'static'), 'static', {
+  maxage: 120,
 }))
 app.use(rootRouter.getRoutes())
 app.use(
@@ -18,7 +18,7 @@ app.use(
     if (res.error) {
       res.status = res.error.status || 500
       res.body = res.error.message
-    } else if (res.noMatch) {
+    } else if (!req.requestHandled) {
       res.status = 404
       res.body = 'Not Found'
     }

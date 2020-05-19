@@ -12,6 +12,12 @@ import { Middleware, Response, NextFunction } from "./mod.ts"
 import debug from 'https://deno.land/x/debuglog/debug.ts'
 let logger = debug('static')
 
+declare module "https://deno.land/std@0.51.0/http/server.ts" {
+  interface ServerRequest {
+    requestHandled: boolean
+  }
+}
+
 const UP_PATH_REGEXP = /(?:^|[\\/])\.\.(?:[\\/]|$)/;
 
 function isHidden(path: string) {
@@ -55,7 +61,7 @@ export interface options {
  * @public
  */
 
-export function serveStatic (root: string, options: options = {}): Middleware {
+export function serveStatic (root: string, endpoint: string, options: options = {}): Middleware {
   const {
     fallthrough = true,
     immutable = false,
@@ -65,12 +71,20 @@ export function serveStatic (root: string, options: options = {}): Middleware {
     throw new Error('root path required')
   }
 
+  if (endpoint.charAt(0) !== '/') {
+    endpoint = '/' + endpoint
+  }
+
   if (typeof root !== 'string') {
     throw new TypeError('root path must be a string')
   }
   
   return async (req: ServerRequest, res: Response, next: NextFunction) => {
     logger('running')
+    if (req.url.indexOf(endpoint) !== 0) {
+      return next()
+    }
+    
     if (req.method !== 'GET' && req.method !== 'HEAD') {
       if (fallthrough) {
         return next()
@@ -84,7 +98,7 @@ export function serveStatic (root: string, options: options = {}): Middleware {
       return
     }
 
-    let path = root + req.url
+    let path = root + req.url.replace(endpoint, '')
     // containing NULL bytes is malicious
     if (path.includes("\0")) {
       return next({message: 'Malicious Path', status: 400})
@@ -131,9 +145,8 @@ export function serveStatic (root: string, options: options = {}): Middleware {
     }
    
     res.body = readFileStrSync(path, { encoding: "utf8" })
+    req.requestHandled = true
     await res.send()
     next()
   }
 }
-
-serveStatic('./test')

@@ -1,14 +1,15 @@
-import { Middleware, Response, NextFunction } from "https://raw.githubusercontent.com/JWebCoder/mith/master/mod.ts";
+import { Middleware, Response, NextFunction } from "./mod.ts";
 import { ServerRequest } from "https://deno.land/std@0.51.0/http/server.ts";
 import { match, MatchFunction } from 'https://raw.githubusercontent.com/pillarjs/path-to-regexp/master/src/index.ts'
 import { getStatePath, setStatePath, deleteStatePath } from './routerState.ts'
 
 declare module "https://deno.land/std@0.51.0/http/server.ts" {
-    interface ServerRequest {
-      params: {
-        [key: string]: any
-      }
+  interface ServerRequest {
+    params: {
+      [key: string]: any
     }
+    requestHandled: boolean
+  }
 }
 
 interface RouterMiddleware extends Middleware {
@@ -54,8 +55,10 @@ export default class Router {
 
   getRoutes(): RouterMiddleware {
     const router: RouterMiddleware = (req: ServerRequest, res: Response, next: NextFunction) => {
+      if (req.requestHandled) {
+        return next()
+      }
       let matchedRoute = false
-      res.noMatch = true
       const connectionId = req.conn.rid
       const statePath = getStatePath(req.conn.rid)
       for (const savedPath of this.savedPaths[req.method as methods]) {
@@ -63,7 +66,7 @@ export default class Router {
         
         const matched = route.matcher(req.url.replace(statePath, ''))
         if (matched) {
-          res.noMatch = false
+          req.requestHandled = true
           matchedRoute = true
           req.params = {
             ...req.params,

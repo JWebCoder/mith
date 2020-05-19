@@ -19,8 +19,11 @@ export default class Mith {
   private middlewareArray: Middleware[] = []
   private PORT = 8000
   private server?: Server
+  private middlewareLastIndex: number = -1
+
   public use(middleware: Middleware) {
     this.middlewareArray.push(middleware)
+    this.middlewareLastIndex = this.middlewareArray.length - 1
   }
   
   /**
@@ -84,13 +87,14 @@ export default class Mith {
         }
         if (error) {
           response.error = error
-          const newIndex = this.middlewareArray.length - 1
-          if (newIndex !== index) {
-            return this.dispatch(request, response, newIndex)
+          if (this.middlewareLastIndex > index) {
+            return this.dispatch(request, response, this.middlewareLastIndex)
           }
           this.sendResponse(request, response)
         } else if (index + 1 < this.middlewareArray.length) {
           this.dispatch(request, response, index + 1)
+        } else {
+          this.sendResponse(request, response)
         }
       }
     )
