@@ -46,7 +46,6 @@ export default class Mith {
    * Closes the ongoing server
    *
    *  mith.close()
-   *
    */
 
   public close() {
@@ -56,21 +55,25 @@ export default class Mith {
   /**
    * Listens to the async iterable server instance for incoming requests
    * Runs the stack of middleware for each request
-   *
    */
   private async setupListener() {
     if (this.server) {
       for await (const req of this.server) {
-        this.runMiddleware(req, this.buildResponse(req))
+        this.dispatch(req, this.buildResponse(req), 0)
       }
     }
   }
 
-
-  private runMiddleware(request: ServerRequest, response: Response) {
-    this.dispatch(request, response, 0)
-  }
-
+  /**
+   * Dispatch function will trigger the middleware in sequence
+   * In case a callback is called with an error
+   * the last middleware in the stack is called
+   *
+   * @param request Deno Server Request Object
+   * @param response Mith Server Response Object
+   * @param index number
+   * @return void
+   */
   private dispatch (request: ServerRequest, response: Response, index: number): void {
     this.middlewareArray[index](
       request,
@@ -81,7 +84,11 @@ export default class Mith {
         }
         if (error) {
           response.error = error
-          this.dispatch(request, response, this.middlewareArray.length - 1)
+          const newIndex = this.middlewareArray.length - 1
+          if (newIndex !== index) {
+            return this.dispatch(request, response, newIndex)
+          }
+          this.sendResponse(request, response)
         } else if (index + 1 < this.middlewareArray.length) {
           this.dispatch(request, response, index + 1)
         }
@@ -89,6 +96,13 @@ export default class Mith {
     )
   }
 
+  /**
+   * Sends the response back to the caller
+   *
+   * @param request Deno Server Request Object
+   * @param response Mith Server Response Object
+   * @return void
+   */
   private async sendResponse(request: ServerRequest, response: Response) {
     if (!response.sent) {
       response.sent = true
@@ -102,6 +116,13 @@ export default class Mith {
     }
   }
 
+  /**
+   * Generates the inicial Mith Response Object
+   *
+   * @param request Deno Server Request Object
+   * @param response Mith Server Response Object
+   * @return void
+   */
   private buildResponse(req: ServerRequest): Response {
     const newResponse = {
       body: {},
