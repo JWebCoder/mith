@@ -7,7 +7,7 @@ deepRouter.use(
   '/test/:age',
   (req, res, next) => {
     res.body.test = '/test/:name/test/:age'
-    res.body.params = req.params.id
+    res.body.params = req.params
     next()
   }  
 )
@@ -17,6 +17,15 @@ deepRouter.use(
   '/test',
   (req, res, next) => {
     res.body.test = '/test/:name/test'
+    res.body.params = req.params
+    next()
+  }  
+)
+
+deepRouter.use(
+  'GET',
+  '/',
+  (req, res, next) => {
     res.body.params = req.params
     next()
   }  

@@ -5,10 +5,10 @@
  */
 
 import { ServerRequest } from "https://deno.land/std@0.51.0/http/server.ts"
-import { readFileStrSync } from "https://deno.land/std@0.51.0/fs/mod.ts";
+import { readFileStrSync } from "https://deno.land/std@0.51.0/fs/read_file_str.ts";
 import { sep, normalize, extname } from "https://deno.land/std@0.51.0/path/mod.ts"
 import { contentType } from "https://deno.land/x/media_types@v2.3.1/mod.ts";
-import { Middleware, Response, NextFunction } from "./mod.ts"
+import { Middleware, Response, NextFunction } from "https://deno.land/x/mith@v0.1.0/mod.ts"
 import debug from 'https://deno.land/x/debuglog/debug.ts'
 let logger = debug('static')
 

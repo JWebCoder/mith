@@ -1,4 +1,4 @@
-# mith
+# Mith
 
 A middleware framework for Deno's http/s server
 
@@ -14,8 +14,8 @@ Differently from Express, the main Mith application is only responsible to handl
 
 **Basic integration with routing**
 ```typescript
-import Mith from 'https://raw.githubusercontent.com/JWebCoder/mith/master/mod.ts'
-import Router from 'https://raw.githubusercontent.com/JWebCoder/mith/master/router.ts'
+import Mith from 'https://deno.land/x/mith@v0.1.0/mod.ts'
+import Router from 'https://deno.land/x/mith-router@v0.0.1/mod.ts'
 
 const { env } = Deno
 
@@ -43,9 +43,9 @@ Right now I'm still working on the documentation, so you can check the **example
 
 ## Available middlewares
 
-- **router.ts** - router middleware
-- **cookieSession.ts** - session middleware using cookies (WIP)
-- **cookieSession.ts** - session middleware using cookies (WIP)
+- **[mith-router](https://github.com/JWebCoder/mith-router)** - router middleware
+- **cookieSession.ts** - session middleware using cookies
+- **static.ts** - static file server (WIP)
 
 **Note:** These middlewares will eventually move to their own repositories to split responsibilities and improve maintenance
 

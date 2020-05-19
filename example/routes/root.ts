@@ -54,31 +54,6 @@ router.use(
 
 router.use(
   'GET',
-  '/test1',
-  (req, res, next) => {
-    if (!req.session.test && req.session.test !== 0) {
-      req.session.test = -1
-    }
-    req.session.test += 1
-    res.body.test = req.session
-    next()
-  }
-)
-
-router.use(
-  'GET',
-  '/test2',
-  (req, res, next) => {
-    req.session.test = {
-      stuff: 1
-    }
-    res.body.test = 'tested'
-    next()
-  }
-)
-
-router.use(
-  'GET',
   '/close',
   (req, res, next) => {
     app.close()

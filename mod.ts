@@ -24,6 +24,10 @@ export class Mith {
   private server?: Server
   private middlewareLastIndex: number = -1
 
+  /** Register middleware to be used with the application.
+   * @param middleware
+   * @return void
+  */
   public use(middleware: Middleware) {
     this.middlewareArray.push(middleware)
     this.middlewareLastIndex = this.middlewareArray.length - 1
