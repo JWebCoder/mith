@@ -84,7 +84,7 @@ export class Mith {
    * @param index number
    * @return void
    */
-  private dispatch (request: ServerRequest, response: Response, index: number): void {
+  public dispatch (request: ServerRequest, response: Response, index: number): void {
     this.middlewareArray[index](
       request,
       response,
