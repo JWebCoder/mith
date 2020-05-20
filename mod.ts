@@ -99,6 +99,9 @@ export class Mith {
         }
         if (error) {
           response.error = error
+          if (subApp && next) {
+            return next(error)
+          }
           if (this.middlewareLastIndex > index) {
             return this.dispatch(request, response, this.middlewareLastIndex)
           }
