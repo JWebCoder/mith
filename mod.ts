@@ -24,12 +24,12 @@ export class Mith {
   private server?: Server
   private middlewareLastIndex: number = -1
 
-  /** Register middleware to be used with the application.
-   * @param middleware
-   * @return void
-  */
-  public use(middleware: Middleware) {
-    this.middlewareArray.push(middleware)
+  public use(middleware: Middleware | Middleware[]) {
+    if (Array.isArray(middleware)) {
+      this.middlewareArray.push(...middleware)
+    } else {
+      this.middlewareArray.push(middleware)
+    }
     this.middlewareLastIndex = this.middlewareArray.length - 1
   }
   
@@ -84,13 +84,17 @@ export class Mith {
    * @param index number
    * @return void
    */
-  public dispatch (request: ServerRequest, response: Response, index: number): void {
+  public dispatch (request: ServerRequest, response: Response, index: number, subApp?: boolean, next?: NextFunction): void {
     this.middlewareArray[index](
       request,
       response,
       (error?: any): void => {
         if (response.finished) {
-          this.sendResponse(request, response)
+          if (!subApp) {
+            this.sendResponse(request, response)
+          } else if (next) {
+            next()
+          }
           return
         }
         if (error) {
@@ -102,7 +106,12 @@ export class Mith {
         } else if (index + 1 < this.middlewareArray.length) {
           this.dispatch(request, response, index + 1)
         } else {
-          this.sendResponse(request, response)
+          if (!subApp) {
+            this.sendResponse(request, response)
+          }
+          if (next) {
+            next()
+          }
         }
       }
     )
