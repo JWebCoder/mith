@@ -4,7 +4,7 @@ on: [push, pull_request]
 
 jobs:
   build:
-    name: oak server tests
+    name: mith server tests
     runs-on: ubuntu-latest
     steps:
       - name: clone repository
@@ -14,4 +14,4 @@ jobs:
         run: |
           curl -L https://deno.land/x/install/install.sh | sh -s "v1.0.0"
           export PATH="$HOME/.deno/bin:$PATH"
-          deno test --allow-read
+          deno test --allow-net
