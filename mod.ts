@@ -148,17 +148,20 @@ export class Mith {
    * @return void
    */
   private buildResponse(req: ServerRequest): Response {
-    const newResponse = {
+    const newResponse: Response = {
       body: {},
       headers: new Headers(),
       sendResponse: false,
       finished: false,
       sent: false,
+      status: 200,
       send: async () => {
         await this.sendResponse(req, newResponse)
+        return newResponse
       },
       end: () => {
         newResponse.finished = true
+        return newResponse
       }
     }
     return  newResponse
