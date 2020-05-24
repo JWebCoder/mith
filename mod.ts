@@ -15,6 +15,10 @@ export interface Response extends DenoResponse {
   end: () => void
 }
 
+export type MithConfig = {
+  isSubApp: boolean
+}
+
 /** A class which registers middleware (via `.use()`) and then processes
  * inbound requests against that middleware (via `.listen()`).
  */
@@ -23,6 +27,10 @@ export class Mith {
   private PORT = 8000
   private server?: Server
   private middlewareLastIndex: number = -1
+  private isSubApp: boolean
+  constructor(config?: MithConfig) {
+    this.isSubApp = config?.isSubApp || false
+  }
 
   public use(middleware: Middleware | Middleware[]) {
     if (Array.isArray(middleware)) {
@@ -84,13 +92,13 @@ export class Mith {
    * @param index number
    * @return void
    */
-  public dispatch (request: ServerRequest, response: Response, index: number, subApp?: boolean, next?: NextFunction): void {
+  public dispatch (request: ServerRequest, response: Response, index: number, next?: NextFunction): void {
     this.middlewareArray[index](
       request,
       response,
       (error?: any): void => {
         if (response.finished) {
-          if (!subApp) {
+          if (!this.isSubApp) {
             this.sendResponse(request, response)
           } else if (next) {
             next()
@@ -99,7 +107,7 @@ export class Mith {
         }
         if (error) {
           response.error = error
-          if (subApp && next) {
+          if (this.isSubApp && next) {
             return next(error)
           }
           if (this.middlewareLastIndex > index) {
@@ -109,7 +117,7 @@ export class Mith {
         } else if (index + 1 < this.middlewareArray.length) {
           this.dispatch(request, response, index + 1)
         } else {
-          if (!subApp) {
+          if (!this.isSubApp) {
             this.sendResponse(request, response)
           }
           if (next) {
