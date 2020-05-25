@@ -1,10 +1,14 @@
 import { serve, ServerRequest, Response as DenoResponse, Server, HTTPOptions } from "https://deno.land/std@0.51.0/http/server.ts";
 
 export type NextFunction = (err?: any) => void
+export interface Middleware {
+  (request: Request, response: Response, next: NextFunction): void
+  [key: string]: any
+}
 
-export type Middleware = (request: Request, response: Response, next: NextFunction) => void 
-
-export interface Request extends ServerRequest {}
+export interface Request extends ServerRequest {
+  [key: string]: any
+}
 
 export interface Response extends DenoResponse {
   error?: any

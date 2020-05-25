@@ -10,7 +10,7 @@ app.use(cookieSession({
   secret:'stuff'
 }))
 app.use(mithCors()); // Enable CORS for All Routes
-app.use(serveStatic(resolve(Deno.cwd(), 'static'), '/', {
+app.use(serveStatic(resolve(Deno.cwd(), 'static'), '/static', {
   maxage: 120,
 }))
 app.use(rootRouter.getRoutes())

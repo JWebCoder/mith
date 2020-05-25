@@ -98,7 +98,7 @@ export function serveStatic (root: string, endpoint: string, options: options = 
       return
     }
 
-    let path = root + req.url.replace(endpoint, '')
+    let path = root + '/' + req.url.replace(endpoint, '')
     // containing NULL bytes is malicious
     if (path.includes("\0")) {
       return next({message: 'Malicious Path', status: 400})
@@ -115,6 +115,7 @@ export function serveStatic (root: string, endpoint: string, options: options = 
       return next({message: 'Forbidden', status: 403})
     }
 
+    console.log('path', path)
     if (!await exists(path)) {
       if (fallthrough) {
         return next()
@@ -127,6 +128,7 @@ export function serveStatic (root: string, endpoint: string, options: options = 
       return next({message: 'Forbidden', status: 403})
     }
 
+    console.log('extname(path)', extname(path), path)
     const mimeType = contentType(extname(path))
     if (!mimeType) {
       return next({message: 'Not found', status: 404})
@@ -146,6 +148,7 @@ export function serveStatic (root: string, endpoint: string, options: options = 
    
     res.body = readFileStrSync(path, { encoding: "utf8" })
     req.requestHandled = true
+    console.log('hello sending file')
     res.send()
   }
 }
