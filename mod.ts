@@ -2,7 +2,7 @@ import { serve, ServerRequest, Response as DenoResponse, Server, HTTPOptions } f
 
 export type NextFunction = (err?: any) => void
 
-export type Middleware = (request: ServerRequest, response: Response, next: NextFunction) => void 
+export type Middleware = (request: Request, response: Response, next: NextFunction) => void 
 
 export interface Request extends ServerRequest {}
 
@@ -97,7 +97,7 @@ export class Mith {
     }
   }
 
-  public async dispatchError(request: ServerRequest, response: Response, index: number, next?: NextFunction) {
+  public async dispatchError(request: Request, response: Response, index: number, next?: NextFunction) {
     let nextCalled = false
     await this.errorHandlerArray[index](
       request,
@@ -122,7 +122,7 @@ export class Mith {
    * @param index number
    * @return void
    */
-  public async dispatch (request: ServerRequest, response: Response, index: number, next?: NextFunction): Promise<void> {
+  public async dispatch (request: Request, response: Response, index: number, next?: NextFunction): Promise<void> {
     let nextCalled = false
     await this.middlewareArray[index](
       request,
@@ -183,7 +183,7 @@ export class Mith {
    * @param response Mith Server Response Object
    * @return void
    */
-  private async sendResponse(request: ServerRequest, response: Response) {
+  private async sendResponse(request: Request, response: Response) {
     if (!response.sent) {
       response.sent = true
       if (typeof response.body === 'object') {
@@ -203,7 +203,7 @@ export class Mith {
    * @param response Mith Server Response Object
    * @return void
    */
-  private buildResponse(req: ServerRequest): Response {
+  private buildResponse(req: Request): Response {
     const newResponse: Response = {
       body: {},
       headers: new Headers(),
