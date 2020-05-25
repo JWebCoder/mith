@@ -14,7 +14,7 @@ app.use(serveStatic(resolve(Deno.cwd(), 'static'), 'static', {
   maxage: 120,
 }))
 app.use(rootRouter.getRoutes())
-app.use(
+app.error(
   (req, res, next) => {
     if (res.error) {
       res.status = res.error.status || 500

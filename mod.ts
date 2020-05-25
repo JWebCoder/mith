@@ -19,19 +19,28 @@ export type MithConfig = {
   isSubApp: boolean
 }
 
-/** A class which registers middleware (via `.use()`) and then processes
+/**
+ * A class which registers middleware (via `.use()`) and then processes
  * inbound requests against that middleware (via `.listen()`).
  */
 export class Mith {
   private middlewareArray: Middleware[] = []
+  private errorHandlerArray: Middleware[] = []
   private PORT = 8000
   private server?: Server
   private middlewareLastIndex: number = -1
+  private errorHandlerLastIndex: number = -1
   private isSubApp: boolean
+  
   constructor(config?: MithConfig) {
     this.isSubApp = config?.isSubApp || false
   }
 
+  /**
+   * Register middleware to be used with the application.
+   * @param Middleware can be a single one or an array
+   * @return void
+  */
   public use(middleware: Middleware | Middleware[]) {
     if (Array.isArray(middleware)) {
       this.middlewareArray.push(...middleware)
@@ -39,6 +48,20 @@ export class Mith {
       this.middlewareArray.push(middleware)
     }
     this.middlewareLastIndex = this.middlewareArray.length - 1
+  }
+
+  /**
+   * Register middleware to be used when next(error) is called.
+   * @param Middleware can be a single one or an array
+   * @return void
+  */
+  public error(middleware: Middleware | Middleware[]) {
+    if (Array.isArray(middleware)) {
+      this.errorHandlerArray.push(...middleware)
+    } else {
+      this.errorHandlerArray.push(middleware)
+    }
+    this.errorHandlerLastIndex = this.errorHandlerArray.length - 1
   }
   
   /**
@@ -82,6 +105,33 @@ export class Mith {
     }
   }
 
+  public dispatchError(request: ServerRequest, response: Response, index: number, next?: NextFunction) {
+    this.errorHandlerArray[index](
+      request,
+      response,
+      () => {
+        if (response.finished) {
+          if (!this.isSubApp) {
+            this.sendResponse(request, response)
+          } else if (next) {
+            next()
+          }
+          return
+        }
+        if (index + 1 < this.errorHandlerArray.length) {
+          this.dispatch(request, response, index + 1)
+        } else {
+          if (!this.isSubApp) {
+            this.sendResponse(request, response)
+          }
+          if (next) {
+            next(response.error)
+          }
+        }
+      }
+    )
+  }
+
   /**
    * Dispatch function will trigger the middleware in sequence
    * In case a callback is called with an error
@@ -110,8 +160,8 @@ export class Mith {
           if (this.isSubApp && next) {
             return next(error)
           }
-          if (this.middlewareLastIndex > index) {
-            return this.dispatch(request, response, this.middlewareLastIndex)
+          if (this.errorHandlerArray.length !== 0) {
+            return this.dispatchError(request, response, 0)
           }
           this.sendResponse(request, response)
         } else if (index + 1 < this.middlewareArray.length) {
