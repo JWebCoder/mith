@@ -15,7 +15,7 @@ innerRouter.use('GET', '/', (req, res, next) => {
   console.log('hello')
   res.body.test = '/'
   res.body.params = req.params
-  next()
+  res.send()
 })
 
 export default innerRouter

@@ -4,16 +4,15 @@
  * MIT Licensed
  */
 
-import { ServerRequest } from "https://deno.land/std@0.51.0/http/server.ts"
 import { readFileStrSync } from "https://deno.land/std@0.51.0/fs/read_file_str.ts";
 import { sep, normalize, extname } from "https://deno.land/std@0.51.0/path/mod.ts"
 import { contentType } from "https://deno.land/x/media_types@v2.3.1/mod.ts";
-import { Middleware, Response, NextFunction } from "https://deno.land/x/mith@v0.1.0/mod.ts"
+import { Middleware, Response, Request, NextFunction } from "./mod.ts"
 import debug from 'https://deno.land/x/debuglog/debug.ts'
 let logger = debug('static')
 
-declare module "https://deno.land/std@0.51.0/http/server.ts" {
-  interface ServerRequest {
+declare module "./mod.ts" {
+  interface Request {
     requestHandled: boolean
   }
 }
@@ -79,8 +78,9 @@ export function serveStatic (root: string, endpoint: string, options: options = 
     throw new TypeError('root path must be a string')
   }
   
-  return async (req: ServerRequest, res: Response, next: NextFunction) => {
+  return async (req: Request, res: Response, next: NextFunction) => {
     logger('running')
+    console.log(req.url)
     if (req.url.indexOf(endpoint) !== 0) {
       return next()
     }
@@ -146,7 +146,6 @@ export function serveStatic (root: string, endpoint: string, options: options = 
    
     res.body = readFileStrSync(path, { encoding: "utf8" })
     req.requestHandled = true
-    await res.send()
-    next()
+    res.send()
   }
 }

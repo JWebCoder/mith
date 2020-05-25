@@ -4,6 +4,8 @@ export type NextFunction = (err?: any) => void
 
 export type Middleware = (request: ServerRequest, response: Response, next: NextFunction) => void 
 
+export interface Request extends ServerRequest {}
+
 export interface Response extends DenoResponse {
   error?: any
   body: any
@@ -12,11 +14,6 @@ export interface Response extends DenoResponse {
   sendResponse: boolean
   sent: boolean
   send: () => void
-  end: () => void
-}
-
-export type MithConfig = {
-  isSubApp: boolean
 }
 
 /**
@@ -30,11 +27,6 @@ export class Mith {
   private server?: Server
   private middlewareLastIndex: number = -1
   private errorHandlerLastIndex: number = -1
-  private isSubApp: boolean
-  
-  constructor(config?: MithConfig) {
-    this.isSubApp = config?.isSubApp || false
-  }
 
   /**
    * Register middleware to be used with the application.
@@ -105,31 +97,19 @@ export class Mith {
     }
   }
 
-  public dispatchError(request: ServerRequest, response: Response, index: number, next?: NextFunction) {
-    this.errorHandlerArray[index](
+  public async dispatchError(request: ServerRequest, response: Response, index: number, next?: NextFunction) {
+    let nextCalled = false
+    await this.errorHandlerArray[index](
       request,
       response,
-      () => {
-        if (response.finished) {
-          if (!this.isSubApp) {
-            this.sendResponse(request, response)
-          } else if (next) {
-            next()
-          }
-          return
-        }
-        if (index + 1 < this.errorHandlerArray.length) {
-          this.dispatch(request, response, index + 1)
-        } else {
-          if (!this.isSubApp) {
-            this.sendResponse(request, response)
-          }
-          if (next) {
-            next(response.error)
-          }
-        }
+      (): void => {
+        nextCalled = true
+        this.nextErrorMiddleware(request, response, index, next)
       }
     )
+    if (!nextCalled) {
+      this.nextErrorMiddleware(request, response, index, next)
+    }
   }
 
   /**
@@ -142,40 +122,58 @@ export class Mith {
    * @param index number
    * @return void
    */
-  public dispatch (request: ServerRequest, response: Response, index: number, next?: NextFunction): void {
-    this.middlewareArray[index](
+  public async dispatch (request: ServerRequest, response: Response, index: number, next?: NextFunction): Promise<void> {
+    let nextCalled = false
+    await this.middlewareArray[index](
       request,
       response,
       (error?: any): void => {
-        if (response.finished) {
-          if (!this.isSubApp) {
-            this.sendResponse(request, response)
-          } else if (next) {
-            next()
-          }
-          return
-        }
-        if (error) {
-          response.error = error
-          if (this.isSubApp && next) {
-            return next(error)
-          }
-          if (this.errorHandlerArray.length !== 0) {
-            return this.dispatchError(request, response, 0)
-          }
-          this.sendResponse(request, response)
-        } else if (index + 1 < this.middlewareArray.length) {
-          this.dispatch(request, response, index + 1)
-        } else {
-          if (!this.isSubApp) {
-            this.sendResponse(request, response)
-          }
-          if (next) {
-            next()
-          }
-        }
+        nextCalled = true
+        this.nextMiddleware(request, response, index, next, error)
       }
     )
+    if (!nextCalled) {
+      this.nextMiddleware(request, response, index, next)
+    }
+  }
+
+  private nextMiddleware(request: Request, response: Response, index: number, next?: NextFunction, error?: any) {
+    if (response.finished) {
+      return this.sendOrNext(request, response, next)
+    }
+    if (error) {
+      response.error = error
+      if (this.errorHandlerArray.length !== 0) {
+        return this.dispatchError(request, response, 0)
+      }
+      return this.sendOrNext(request, response, next, error)
+      
+    } else if (index + 1 < this.middlewareArray.length) {
+      this.dispatch(request, response, index + 1)
+    } else {
+      return this.sendOrNext(request, response, next)
+    }
+  }
+
+  private nextErrorMiddleware(request: Request, response: Response, index: number, next?: NextFunction) {
+    if (response.finished) {
+      return this.sendOrNext(request, response, next)
+    }
+    if (index + 1 < this.errorHandlerArray.length) {
+      this.dispatch(request, response, index + 1)
+    } else {
+      return this.sendOrNext(request, response, next)
+    }
+  }
+
+  private sendOrNext(req: Request, res: Response, next?: NextFunction, error?: any) {
+    if (this.server) {
+      return this.sendResponse(req, res)
+    } else if (next) {
+      return next(error)
+    }
+    console.log('Request finished but no next middleware defined')
+    return
   }
 
   /**
@@ -214,10 +212,6 @@ export class Mith {
       sent: false,
       status: 200,
       send: async () => {
-        await this.sendResponse(req, newResponse)
-        return newResponse
-      },
-      end: () => {
         newResponse.finished = true
         return newResponse
       }

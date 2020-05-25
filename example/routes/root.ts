@@ -11,7 +11,7 @@ router.use(
   (req, res, next) => {
 
     res.body = userController.getUserById(req.params.id)
-    next()
+    res.send()
   }
 )
 
@@ -20,7 +20,7 @@ router.use(
   '/users',
   (req, res, next) => {
     res.body = userController.getUsers()
-    next()
+    res.send()
   }
 )
 
