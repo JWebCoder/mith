@@ -92,7 +92,7 @@ export class Mith {
   private async setupListener() {
     if (this.server) {
       for await (const req of this.server) {
-        this.dispatch(req, this.buildResponse(req), 0)
+        this.dispatch(req as Request, this.buildResponse(req as Request), 0)
       }
     }
   }
