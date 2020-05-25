@@ -1,14 +1,10 @@
-import { serve, ServerRequest, Response as DenoResponse, Server, HTTPOptions } from "https://deno.land/std@0.51.0/http/server.ts";
+import { serve, ServerRequest, Response as DenoResponse, Server, HTTPOptions } from "https://deno.land/std@0.53.0/http/server.ts";
+
+export interface Request extends ServerRequest {}
 
 export type NextFunction = (err?: any) => void
-export interface Middleware {
-  (request: Request, response: Response, next: NextFunction): void
-  [key: string]: any
-}
+export type Middleware  = (request: Request, response: Response, next: NextFunction) => void
 
-export interface Request extends ServerRequest {
-  [key: string]: any
-}
 
 export interface Response extends DenoResponse {
   error?: any
@@ -29,8 +25,6 @@ export class Mith {
   private errorHandlerArray: Middleware[] = []
   private PORT = 8000
   private server?: Server
-  private middlewareLastIndex: number = -1
-  private errorHandlerLastIndex: number = -1
 
   /**
    * Register middleware to be used with the application.
@@ -43,7 +37,6 @@ export class Mith {
     } else {
       this.middlewareArray.push(middleware)
     }
-    this.middlewareLastIndex = this.middlewareArray.length - 1
   }
 
   /**
@@ -57,7 +50,6 @@ export class Mith {
     } else {
       this.errorHandlerArray.push(middleware)
     }
-    this.errorHandlerLastIndex = this.errorHandlerArray.length - 1
   }
   
   /**
@@ -101,6 +93,15 @@ export class Mith {
     }
   }
 
+  /**
+   * dispatchError function will trigger the error middleware in sequence
+   *
+   * @param request Deno Server Request Object
+   * @param response Mith Server Response Object
+   * @param index number
+   * @param next function can be passed to cicle between Mith apps
+   * @return void
+   */
   public async dispatchError(request: Request, response: Response, index: number, next?: NextFunction) {
     let nextCalled = false
     await this.errorHandlerArray[index](
@@ -124,6 +125,7 @@ export class Mith {
    * @param request Deno Server Request Object
    * @param response Mith Server Response Object
    * @param index number
+   * @param next function can be passed to cicle between Mith apps
    * @return void
    */
   public async dispatch (request: Request, response: Response, index: number, next?: NextFunction): Promise<void> {
@@ -141,6 +143,17 @@ export class Mith {
     }
   }
 
+  /**
+   * nextMiddleware function will trigger the next middleware in line
+   * In case an error is passed it moves to the error middleware stack
+   *
+   * @param request Deno Server Request Object
+   * @param response Mith Server Response Object
+   * @param index number
+   * @param next function can be passed to cicle between Mith apps
+   * @param error received from a callback
+   * @return void
+   */
   private nextMiddleware(request: Request, response: Response, index: number, next?: NextFunction, error?: any) {
     if (response.finished) {
       return this.sendOrNext(request, response, next)
@@ -159,6 +172,15 @@ export class Mith {
     }
   }
 
+  /**
+   * nextErrorMiddleware function will trigger the next middleware in line
+   *
+   * @param request Deno Server Request Object
+   * @param response Mith Server Response Object
+   * @param index number
+   * @param next function can be passed to cicle between Mith apps
+   * @return void
+   */
   private nextErrorMiddleware(request: Request, response: Response, index: number, next?: NextFunction) {
     if (response.finished) {
       return this.sendOrNext(request, response, next)
@@ -170,6 +192,15 @@ export class Mith {
     }
   }
 
+  /**
+   * Calls sendResponse in case Mith server is already setup
+   * Calls the next function in case this is a sub application
+   * Stops execution otherwise
+   *
+   * @param request Deno Server Request Object
+   * @param response Mith Server Response Object
+   * @return void
+   */
   private sendOrNext(req: Request, res: Response, next?: NextFunction, error?: any) {
     if (this.server) {
       return this.sendResponse(req, res)

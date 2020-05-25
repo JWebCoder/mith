@@ -4,8 +4,8 @@
  * MIT Licensed
  */
 
-import { setCookie, getCookies } from "https://deno.land/std@0.51.0/http/cookie.ts"
-import { v4 } from "https://deno.land/std@0.51.0/uuid/mod.ts";
+import { setCookie, getCookies } from "https://deno.land/std@0.53.0/http/cookie.ts"
+import { v4 } from "https://deno.land/std@0.53.0/uuid/mod.ts";
 import { Middleware, Response, Request, NextFunction } from "./mod.ts"
 import debug from 'https://deno.land/x/debuglog/debug.ts'
 let logger = debug('cookie_session')
