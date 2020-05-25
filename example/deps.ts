@@ -1,5 +1,5 @@
 export { default as debug } from 'https://deno.land/x/debuglog/debug.ts'
-export { Mith } from  'https://deno.land/x/mith@v0.1.1/mod.ts'
+export { Mith } from  'https://deno.land/x/mith@v0.3.0/mod.ts'
 export { Router } from 'https://deno.land/x/mith_router@v0.0.7/mod.ts'
 export { serveStatic } from '../static.ts'
 export { cookieSession } from '../cookieSession.ts'
