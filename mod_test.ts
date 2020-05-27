@@ -1,29 +1,23 @@
-// Copied from https://github.com/defunctzombie/node-util/blob/master/test/node/format.js
 import {
   assert,
   assertEquals,
   assertStrictEq,
-} from "https://deno.land/std@v0.51.0/testing/asserts.ts"
-import { Mith } from "./mod.ts";
+} from "https://deno.land/std@v0.53.0/testing/asserts.ts"
+import exampleApp from './example/example.ts'
+import { delay } from "https://deno.land/std@v0.53.0/async/mod.ts"
+Deno.test("server is created", () => {
+  assert(exampleApp, 'is not created')
+})
 
 Deno.test("simple server setup test", async () => {
-  const app = new Mith()
-  app.use((req, res, next) => {
-    res.body = 'test'
-    next()
-  })
-  
-  app.listen({port: 3000})
-  await fetch('http://localhost:3000').then(
-    async (response) => {
-      const result = await response.text()
-      console.log(result)
-      assertEquals(result, 'test')
-      app.close()
-    }
-  ).catch(
-    (e) => {
-      console.log(e)
-    }
-  )
+  const response = await fetch('http://localhost:8000')
+  const result = await response.json()
+  assertEquals(result.test, '/')
+})
+
+Deno.test("application closes", async () => {
+  exampleApp.close()
+  if (exampleApp.server) {
+    assert((await exampleApp.server?.[Symbol.asyncIterator]().next()).done)
+  }
 })

@@ -3,8 +3,8 @@ import { serve, ServerRequest, Response as DenoResponse, Server, HTTPOptions } f
 export interface Request extends ServerRequest {}
 
 export type NextFunction = (err?: any) => void
-export type Middleware  = (request: Request, response: Response, next: NextFunction) => void
 
+export type Middleware  = (request: Request | any, response: Response | any, next: NextFunction) => void
 
 export interface Response extends DenoResponse {
   error?: any
@@ -24,7 +24,7 @@ export class Mith {
   private middlewareArray: Middleware[] = []
   private errorHandlerArray: Middleware[] = []
   private PORT = 8000
-  private server?: Server
+  public server?: Server
 
   /**
    * Register middleware to be used with the application.
@@ -67,8 +67,7 @@ export class Mith {
    */
   public listen(options: string | HTTPOptions = { port: this.PORT }) {
     this.server = serve(options)
-    this.setupListener()
-    return 
+    return this.setupListener()
   }
 
   /**
