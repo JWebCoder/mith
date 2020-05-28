@@ -31,7 +31,4 @@ app.error(
 
 const PORT = Number(env.get('PORT')) || 8000
 
-app.listen({ port: PORT})
-logger('listening on %s', PORT)
-
 export default app
