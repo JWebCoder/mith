@@ -16,7 +16,6 @@ export interface Response extends DenoResponse {
   body: any
   headers: Headers
   finished: boolean
-  sendResponse: boolean
   sent: boolean
   send: () => void
   redirect: (
@@ -283,7 +282,6 @@ export class Mith {
     const newResponse: Response = {
       body: {},
       headers: new Headers(),
-      sendResponse: false,
       finished: false,
       sent: false,
       status: 200,
