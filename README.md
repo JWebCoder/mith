@@ -1,14 +1,13 @@
 # Mith
 
+![mith ci](https://github.com/JWebCoder/mith/workflows/mith%20ci/badge.svg)
+[![deno doc](https://doc.deno.land/badge.svg)](https://doc.deno.land/https/deno.land/x/mith/mod.ts)
+
 A middleware framework for Deno's http/s server
 
 Highly inspired by the Express middleware system
 
 Differently from Express, the main Mith application is only responsible to handle the middleware system, it has no routes support, and it tries to leave the request and response objects form Deno untouched as much as possible
-
-## Deno documentation
-
-[doc.deno.land/mith](https://doc.deno.land/https/deno.land/x/mith/mod.ts)
 
 ## Usage
 
