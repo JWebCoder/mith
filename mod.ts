@@ -1,10 +1,15 @@
 import { serve, ServerRequest, Response as DenoResponse, Server, HTTPOptions } from "https://deno.land/std@0.53.0/http/server.ts";
 
-export interface Request extends ServerRequest {}
+export interface Request {
+  body: any
+  serverRequest: ServerRequest
+}
 
 export type NextFunction = (err?: any) => void
 
 export type Middleware  = (request: Request | any, response: Response | any, next: NextFunction) => void
+
+export const REDIRECT_BACK = Symbol("redirect backwards")
 
 export interface Response extends DenoResponse {
   error?: any
@@ -14,7 +19,24 @@ export interface Response extends DenoResponse {
   sendResponse: boolean
   sent: boolean
   send: () => void
+  redirect: (
+    url: string | URL | typeof REDIRECT_BACK,
+    alt?: string | URL
+  ) => void
 }
+
+/** Encodes the url preventing double enconding */
+export function encodeUrl(url: string) {
+  return String(url)
+    .replace(UNMATCHED_SURROGATE_PAIR_REGEXP, UNMATCHED_SURROGATE_PAIR_REPLACE)
+    .replace(ENCODE_CHARS_REGEXP, encodeURI)
+}
+
+const ENCODE_CHARS_REGEXP = /(?:[^\x21\x25\x26-\x3B\x3D\x3F-\x5B\x5D\x5F\x61-\x7A\x7E]|%(?:[^0-9A-Fa-f]|[0-9A-Fa-f][^0-9A-Fa-f]|$))+/g
+
+const UNMATCHED_SURROGATE_PAIR_REGEXP = /(^|[^\uD800-\uDBFF])[\uDC00-\uDFFF]|[\uD800-\uDBFF]([^\uDC00-\uDFFF]|$)/g;
+
+const UNMATCHED_SURROGATE_PAIR_REPLACE = "$1\uFFFD$2";
 
 /**
  * A class which registers middleware (via `.use()`) and then processes
@@ -76,7 +98,7 @@ export class Mith {
    *  mith.close()
    */
 
-  public close() {
+  public async close() {
     this.server?.close()
   }
 
@@ -87,7 +109,7 @@ export class Mith {
   private async setupListener() {
     if (this.server) {
       for await (const req of this.server) {
-        this.dispatch(req as Request, this.buildResponse(req as Request), 0)
+        this.dispatch(await this.buildRequest(req), this.buildResponse(req), 0)
       }
     }
   }
@@ -226,7 +248,7 @@ export class Mith {
         }
         response.body = JSON.stringify(response.body)
       }
-      await request.respond(response).catch((e) => {console.log(e)})
+      await request.serverRequest.respond(response).catch((e) => {console.log(e)})
     }
   }
 
@@ -237,7 +259,27 @@ export class Mith {
    * @param response Mith Server Response Object
    * @return void
    */
-  private buildResponse(req: Request): Response {
+  private async buildRequest(req: ServerRequest): Promise<Request> {
+    const newRequest = {
+      serverRequest: req,
+      body: undefined
+    }
+    if (req.body) {
+      const decoder = new TextDecoder()
+      const rawBody = await Deno.readAll(req.body)
+      newRequest.body = JSON.parse(decoder.decode(rawBody))
+    }
+    return newRequest
+  }
+
+  /**
+   * Generates the inicial Mith Response Object
+   *
+   * @param request Deno Server Request Object
+   * @param response Mith Server Response Object
+   * @return void
+   */
+  private buildResponse(req: ServerRequest): Response {
     const newResponse: Response = {
       body: {},
       headers: new Headers(),
@@ -248,6 +290,20 @@ export class Mith {
       send: async () => {
         newResponse.finished = true
         return newResponse
+      },
+      redirect: (url, alt = "/"): void => {
+        if (url === REDIRECT_BACK) {
+          url = req.headers.get("Referrer") ?? String(alt);
+        } else if (typeof url === "object") {
+          url = String(url);
+        }
+        newResponse.headers.set("Location", encodeUrl(url));
+        
+        newResponse.status = 302;
+        
+        newResponse.headers.set('Content-Type', 'text/plain; charset=utf-8')
+        newResponse.body = `Redirecting to ${url}.`;
+        newResponse.send()
       }
     }
     return  newResponse
