@@ -4,8 +4,8 @@
  * MIT Licensed
  */
 
-import { readFileStrSync } from "https://deno.land/std@0.51.0/fs/read_file_str.ts";
-import { sep, normalize, extname } from "https://deno.land/std@0.51.0/path/mod.ts"
+import { readFileStrSync } from "https://deno.land/std@0.53.0/fs/read_file_str.ts";
+import { sep, normalize, extname } from "https://deno.land/std@0.53.0/path/mod.ts"
 import { contentType } from "https://deno.land/x/media_types@v2.3.1/mod.ts";
 import { Middleware, Response, Request, NextFunction } from "./mod.ts"
 import debug from 'https://deno.land/x/debuglog/debug.ts'
