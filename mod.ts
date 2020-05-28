@@ -1,5 +1,5 @@
-import { serve, ServerRequest, Response as DenoResponse, Server, HTTPOptions } from "https://deno.land/std@0.53.0/http/server.ts";
-
+import { serve, ServerRequest, Server, HTTPOptions } from "https://deno.land/std@0.53.0/http/server.ts";
+import { Response, IResponse } from './response.ts'
 export interface Request {
   body: any
   serverRequest: ServerRequest
@@ -7,35 +7,7 @@ export interface Request {
 
 export type NextFunction = (err?: any) => void
 
-export type Middleware  = (request: Request | any, response: Response | any, next: NextFunction) => void
-
-export const REDIRECT_BACK = Symbol("redirect backwards")
-
-export interface Response extends DenoResponse {
-  error?: any
-  body: any
-  headers: Headers
-  finished: boolean
-  sent: boolean
-  send: () => void
-  redirect: (
-    url: string | URL | typeof REDIRECT_BACK,
-    alt?: string | URL
-  ) => void
-}
-
-/** Encodes the url preventing double enconding */
-export function encodeUrl(url: string) {
-  return String(url)
-    .replace(UNMATCHED_SURROGATE_PAIR_REGEXP, UNMATCHED_SURROGATE_PAIR_REPLACE)
-    .replace(ENCODE_CHARS_REGEXP, encodeURI)
-}
-
-const ENCODE_CHARS_REGEXP = /(?:[^\x21\x25\x26-\x3B\x3D\x3F-\x5B\x5D\x5F\x61-\x7A\x7E]|%(?:[^0-9A-Fa-f]|[0-9A-Fa-f][^0-9A-Fa-f]|$))+/g
-
-const UNMATCHED_SURROGATE_PAIR_REGEXP = /(^|[^\uD800-\uDBFF])[\uDC00-\uDFFF]|[\uD800-\uDBFF]([^\uDC00-\uDFFF]|$)/g;
-
-const UNMATCHED_SURROGATE_PAIR_REPLACE = "$1\uFFFD$2";
+export type Middleware  = (request: Request | any, response: IResponse | any, next: NextFunction) => void
 
 /**
  * A class which registers middleware (via `.use()`) and then processes
@@ -108,7 +80,7 @@ export class Mith {
   private async setupListener() {
     if (this.server) {
       for await (const req of this.server) {
-        this.dispatch(await this.buildRequest(req), this.buildResponse(req), 0)
+        this.dispatch(await this.buildRequest(req), new Response(req), 0)
       }
     }
   }
@@ -122,7 +94,7 @@ export class Mith {
    * @param next function can be passed to cicle between Mith apps
    * @return void
    */
-  public async dispatchError(request: Request, response: Response, index: number, next?: NextFunction) {
+  public async dispatchError(request: Request, response: IResponse, index: number, next?: NextFunction) {
     let nextCalled = false
     await this.errorHandlerArray[index](
       request,
@@ -148,7 +120,7 @@ export class Mith {
    * @param next function can be passed to cicle between Mith apps
    * @return void
    */
-  public async dispatch (request: Request, response: Response, index: number, next?: NextFunction): Promise<void> {
+  public async dispatch (request: Request, response: IResponse, index: number, next?: NextFunction): Promise<void> {
     let nextCalled = false
     await this.middlewareArray[index](
       request,
@@ -174,7 +146,7 @@ export class Mith {
    * @param error received from a callback
    * @return void
    */
-  private nextMiddleware(request: Request, response: Response, index: number, next?: NextFunction, error?: any) {
+  private nextMiddleware(request: Request, response: IResponse, index: number, next?: NextFunction, error?: any) {
     if (response.finished) {
       return this.sendOrNext(request, response, next)
     }
@@ -201,7 +173,7 @@ export class Mith {
    * @param next function can be passed to cicle between Mith apps
    * @return void
    */
-  private nextErrorMiddleware(request: Request, response: Response, index: number, next?: NextFunction) {
+  private nextErrorMiddleware(request: Request, response: IResponse, index: number, next?: NextFunction) {
     if (response.finished) {
       return this.sendOrNext(request, response, next)
     }
@@ -221,7 +193,7 @@ export class Mith {
    * @param response Mith Server Response Object
    * @return void
    */
-  private sendOrNext(req: Request, res: Response, next?: NextFunction, error?: any) {
+  private sendOrNext(req: Request, res: IResponse, next?: NextFunction, error?: any) {
     if (this.server) {
       return this.sendResponse(req, res)
     } else if (next) {
@@ -238,7 +210,7 @@ export class Mith {
    * @param response Mith Server Response Object
    * @return void
    */
-  private async sendResponse(request: Request, response: Response) {
+  private async sendResponse(request: Request, response: IResponse) {
     if (!response.sent) {
       response.sent = true
       if (typeof response.body === 'object') {
@@ -269,41 +241,5 @@ export class Mith {
       newRequest.body = JSON.parse(decoder.decode(rawBody))
     }
     return newRequest
-  }
-
-  /**
-   * Generates the inicial Mith Response Object
-   *
-   * @param request Deno Server Request Object
-   * @param response Mith Server Response Object
-   * @return void
-   */
-  private buildResponse(req: ServerRequest): Response {
-    const newResponse: Response = {
-      body: {},
-      headers: new Headers(),
-      finished: false,
-      sent: false,
-      status: 200,
-      send: async () => {
-        newResponse.finished = true
-        return newResponse
-      },
-      redirect: (url, alt = "/"): void => {
-        if (url === REDIRECT_BACK) {
-          url = req.headers.get("Referrer") ?? String(alt);
-        } else if (typeof url === "object") {
-          url = String(url);
-        }
-        newResponse.headers.set("Location", encodeUrl(url));
-        
-        newResponse.status = 302;
-        
-        newResponse.headers.set('Content-Type', 'text/plain; charset=utf-8')
-        newResponse.body = `Redirecting to ${url}.`;
-        newResponse.send()
-      }
-    }
-    return  newResponse
   }
 }
