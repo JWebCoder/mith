@@ -1,7 +1,5 @@
 import { Mith, Request, Response, NextFunction } from './mod.ts'
 
-const { env } = Deno
-
 const app = new Mith()
 
 app.use(async (req: Request, res: Response, next: NextFunction) => {
