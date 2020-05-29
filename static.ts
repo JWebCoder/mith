@@ -7,11 +7,13 @@
 import { readFileStrSync } from "https://deno.land/std@0.53.0/fs/read_file_str.ts";
 import { sep, normalize, extname } from "https://deno.land/std@0.53.0/path/mod.ts"
 import { contentType } from "https://deno.land/x/media_types@v2.3.1/mod.ts";
-import { Middleware, Response, Request, NextFunction } from "./mod.ts"
+import { Middleware, NextFunction } from "./mod.ts"
+import { Response } from './response.ts'
+import { Request } from './request.ts'
 import debug from 'https://deno.land/x/debuglog/debug.ts'
 let logger = debug('static')
 
-declare module "./mod.ts" {
+declare module "./Request.ts" {
   interface Request {
     requestHandled: boolean
   }
@@ -80,12 +82,12 @@ export function serveStatic (root: string, endpoint: string, options: options = 
   
   return async (req: Request, res: Response, next: NextFunction) => {
     logger('running')
-    console.log(req.url)
-    if (req.url.indexOf(endpoint) !== 0) {
+    console.log(req.serverRequest.url)
+    if (req.serverRequest.url.indexOf(endpoint) !== 0) {
       return next()
     }
     
-    if (req.method !== 'GET' && req.method !== 'HEAD') {
+    if (req.serverRequest.method !== 'GET' && req.serverRequest.method !== 'HEAD') {
       if (fallthrough) {
         return next()
       }
@@ -94,11 +96,11 @@ export function serveStatic (root: string, endpoint: string, options: options = 
       res.status = 405
       res.headers.set('Allow', 'GET, HEAD')
       res.headers.set('Content-Length', '0')
-      req.respond(res)
+      res.send()
       return
     }
 
-    let path = root + '/' + req.url.replace(endpoint, '')
+    let path = root + '/' + req.serverRequest.url.replace(endpoint, '')
     // containing NULL bytes is malicious
     if (path.includes("\0")) {
       return next({message: 'Malicious Path', status: 400})
@@ -148,7 +150,7 @@ export function serveStatic (root: string, endpoint: string, options: options = 
    
     res.body = readFileStrSync(path, { encoding: "utf8" })
     req.requestHandled = true
-    console.log('hello sending file')
+    console.log('sending file')
     res.send()
   }
 }
