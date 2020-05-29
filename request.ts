@@ -8,6 +8,7 @@ export interface IRequest {
 
 export class Request implements IRequest{
   serverRequest: ServerRequest
+  [key: string]: any
   private parsedBody: any = undefined
 
   constructor(req: ServerRequest) {

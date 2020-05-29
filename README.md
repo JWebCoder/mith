@@ -1,14 +1,13 @@
 # Mith
 
+![mith ci](https://github.com/JWebCoder/mith/workflows/mith%20ci/badge.svg)
+[![deno doc](https://doc.deno.land/badge.svg)](https://doc.deno.land/https/deno.land/x/mith/mod.ts)
+
 A middleware framework for Deno's http/s server
 
 Highly inspired by the Express middleware system
 
 Differently from Express, the main Mith application is only responsible to handle the middleware system, it has no routes support, and it tries to leave the request and response objects form Deno untouched as much as possible
-
-## Deno documentation
-
-[doc.deno.land/mith](https://doc.deno.land/https/deno.land/x/mith/mod.ts)
 
 ## Usage
 
@@ -64,27 +63,28 @@ Right now I'm still working on the documentation, so you can check the **example
 The request contains information about the request received.
 
 #### properties:
-- body
-The parsed body of the request
-- serverRequest
+- **body**
+Parses the body of the request and returns it in json format
+- **serverRequest**
 The original Deno server request
 
 ### Response
 The response contains information about the response that will be sent back to the requestor.
 
 #### properties:
-- error
-- body
+- **error**
+Contains the error sent when calling next(error)
+- **body**
 The body of the response
-- headers
+- **headers**
 A Headers instance which contains the headers for the response
-- finished
+- **finished**
 A boolean indicating that the response is completed
-- sent
+- **sent**
 A boolean indicating that the response has been already sent to the requestor
-- send
+- **send**
 Sends the response to the requestor
-- redirect
+- **redirect**
 Redirects the user to another location
 
 ### Next
