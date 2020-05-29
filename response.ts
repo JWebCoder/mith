@@ -1,5 +1,4 @@
-import { Response as DenoResponse } from "https://deno.land/std@0.53.0/http/server.ts"
-import { Request } from './mod.ts'
+import { Response as DenoResponse, ServerRequest } from "https://deno.land/std@0.53.0/http/server.ts"
 
 /** Encodes the url preventing double enconding */
 export function encodeUrl(url: string) {
@@ -30,15 +29,15 @@ export interface IResponse extends DenoResponse {
 }
 
 export class Response implements IResponse{
-  request: Request
   error?: any
   body: any
   headers: Headers
   finished: boolean
   sent: boolean
   status: number
+  private request: ServerRequest
 
-  constructor(req: Request) {
+  constructor(req: ServerRequest) {
     this.request = req
     this.body = {}
     this.headers = new Headers()
@@ -58,12 +57,32 @@ export class Response implements IResponse{
     } else if (typeof url === "object") {
       url = String(url);
     }
-    newResponse.headers.set("Location", encodeUrl(url));
+    this.headers.set("Location", encodeUrl(url));
     
-    newResponse.status = 302;
+    this.status = 302;
     
-    newResponse.headers.set('Content-Type', 'text/plain; charset=utf-8')
-    newResponse.body = `Redirecting to ${url}.`;
-    newResponse.send()
+    this.headers.set('Content-Type', 'text/plain; charset=utf-8')
+    this.body = `Redirecting to ${url}.`;
+    this.send()
+  }
+
+  /**
+   * Sends the response back to the caller
+   *
+   * @param request Deno Server Request Object
+   * @param response Mith Server Response Object
+   * @return void
+   */
+  public async sendResponse() {
+    if (!this.sent) {
+      this.sent = true
+      if (typeof this.body === 'object') {
+        if (!this.headers.get('content-type')) {
+          this.headers.set('content-type', 'application/json')
+        }
+        this.body = JSON.stringify(this.body)
+      }
+      await this.request.respond(this).catch((e) => {console.log(e)})
+    }
   }
 }
