@@ -1,20 +1,23 @@
-import { Mith, NextFunction } from './mod.ts'
-import { Request } from './request.ts'
-import { Response } from './response.ts'
+import { Mith, NextFunction, Request, Response } from './mod.ts'
 
 const app = new Mith()
 
 app.use(async (req: Request, res: Response, next: NextFunction) => {
   const body = await req.body()
-  if (body.type === 'error') {
-    return next(new Error('error'))
-  } else if (body.type === 'redirect') {
-    res.redirect('/')
-  } else if (body.type === 'urlencoded') {
-    res.body.test = 'urlencoded'
-  } else {
-    res.body.test = 'test'
+  switch (body.type) {
+    case 'error':
+      return next(new Error('error'))
+    case 'redirect':
+      res.redirect('/')
+      break
+    case 'urlencoded':
+    case 'json':
+      res.body.test = body.type
+      break
+    default:
+      res.body.test = body
   }
+
   next()
 })
 app.error(

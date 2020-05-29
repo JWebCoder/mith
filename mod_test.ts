@@ -17,7 +17,7 @@ Deno.test("simple server setup test", async () => {
     {
       method: 'POST',
       body: JSON.stringify({
-        stuff: 'cool'
+        type: 'json'
       }),
       headers: {
         'Accept': 'application/json',
@@ -27,7 +27,7 @@ Deno.test("simple server setup test", async () => {
   )
   const result = await response.json()
   app.close()
-  assertEquals(result.test, 'test')
+  assertEquals(result.test, 'json')
 })
 
 Deno.test("urlenconded request", async () => {
@@ -46,6 +46,24 @@ Deno.test("urlenconded request", async () => {
   const result = await response.json()
   app.close()
   assertEquals(result.test, 'urlencoded')
+})
+
+Deno.test("test request", async () => {
+  const { default: app } = await import('./app_test.ts')
+  app.listen({ port: 8000})
+  const response = await fetch(
+    'http://localhost:8000',
+    {
+      method: 'POST',
+      body: 'text',
+      headers: {
+        'Content-Type': 'text/plain'
+      }
+    }
+  )
+  const result = await response.json()
+  app.close()
+  assertEquals(result.test, 'text')
 })
 
 Deno.test("request with error", async () => {

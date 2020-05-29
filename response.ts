@@ -1,4 +1,4 @@
-import { Response as DenoResponse, ServerRequest } from "https://deno.land/std@0.53.0/http/server.ts"
+import { Response as DenoResponse, ServerRequest } from './deps.ts'
 
 /** Encodes the url preventing double enconding */
 export function encodeUrl(url: string) {

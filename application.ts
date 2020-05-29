@@ -1,6 +1,5 @@
-import { serve, ServerRequest, Server, HTTPOptions } from "https://deno.land/std@0.53.0/http/server.ts";
-import { Response } from './response.ts'
-import { Request } from './request.ts'
+import { serve, Server, HTTPOptions } from './deps.ts'
+import { Request, Response } from './mod.ts'
 
 export type NextFunction = (err?: any) => void
 
