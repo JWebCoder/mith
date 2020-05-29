@@ -12,12 +12,8 @@ let logger = debug('cookie_session')
 
 type keyTypes = string | number
 
-declare module "./mod.ts" {
-    interface Request {
-      session: {
-        [key in keyTypes]: any
-      }
-    }
+type session = {
+  [key in keyTypes]: any
 }
 
 export interface options {
@@ -69,7 +65,7 @@ export function cookieSession (options: options): Middleware {
 
   return (req: Request, res: Response, next: NextFunction) => {
     logger('running')
-    let authString = getCookies(req)[(configurationOptions.name as string)]
+    let authString = getCookies(req.serverRequest)[(configurationOptions.name as string)]
     
     let authData: {[key: string]: any} = {}
     logger('authString %s', authString)
