@@ -30,6 +30,24 @@ Deno.test("simple server setup test", async () => {
   assertEquals(result.test, 'test')
 })
 
+Deno.test("urlenconded request", async () => {
+  const { default: app } = await import('./app_test.ts')
+  app.listen({ port: 8000})
+  const response = await fetch(
+    'http://localhost:8000',
+    {
+      method: 'POST',
+      body: 'type=urlencoded',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded'
+      }
+    }
+  )
+  const result = await response.json()
+  app.close()
+  assertEquals(result.test, 'urlencoded')
+})
+
 Deno.test("request with error", async () => {
   const { default: app } = await import('./app_test.ts')
   app.listen({ port: 8000})
