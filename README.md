@@ -1,52 +1,13 @@
 # Mith
 
+![mith ci](https://github.com/JWebCoder/mith/workflows/mith%20ci/badge.svg)
+[![deno doc](https://doc.deno.land/badge.svg)](https://doc.deno.land/https/deno.land/x/mith/mod.ts)
+
 A middleware framework for Deno's http/s server
 
 Highly inspired by the Express middleware system
 
 Differently from Express, the main Mith application is only responsible to handle the middleware system, it has no routes support, and it tries to leave the request and response objects form Deno untouched as much as possible
-
-## Deno documentation
-
-[doc.deno.land/mith](https://doc.deno.land/https/deno.land/x/mith/mod.ts)
-
-## Usage
-
-**Basic integration with routing**
-```typescript
-import Mith from 'https://deno.land/x/mith@v0.1.0/mod.ts'
-import Router from 'https://deno.land/x/mith_router@v0.0.1/mod.ts'
-
-const { env } = Deno
-
-const router = new Router()
-
-router.use(
-  'GET',
-  '/',
-  (req, res, next) => {
-    res.body.text = 'something'
-    next()
-  }
-)
-
-const app = new Mith()
-
-app.use(router.getRoutes())
-app.error(
-  (req, res, next) => {
-    res.status = res.error?.status || 500
-    res.body = res.error?.message || 'Error'
-    next()
-  }
-)
-
-const PORT = Number(env.get('PORT')) || 3000
-app.listen({ port: PORT})
-console.log('listening on', PORT)
-```
-
-Right now I'm still working on the documentation, so you can check the **example** folder for full usage examples
 
 ## Available middlewares
 
@@ -58,33 +19,73 @@ Right now I'm still working on the documentation, so you can check the **example
 
 [//]: # (For Routing, session, or any other middleware you can check our awesome-mith site of community resources.)
 
+## Usage
+
+**Basic integration with routing**
+```typescript
+import { Mith, NextFunction, Request, Response } from './mod.ts'
+
+const app = new Mith()
+
+app.use(async (req: Request, res: Response, next: NextFunction) => {
+  const body = await req.body()
+  switch (body.type) {
+    case 'error':
+      return next(new Error('error'))
+    case 'redirect':
+      res.redirect('/')
+      break
+    case 'urlencoded':
+    case 'json':
+      res.body.test = body.type
+      break
+    default:
+      res.body.test = body
+  }
+
+  next()
+})
+app.error(
+  (req: Request, res: Response, next: NextFunction) => {
+    res.status = res.error.status || 500
+    res.body = res.error.message
+    next()
+  }
+)
+
+app.listen({ port: 8000})
+```
+
+Right now I'm still working on the documentation, so you can check the **example** folder for full usage examples
+
 ## Middleware parameters
 
 ### Request
 The request contains information about the request received.
 
 #### properties:
-- body
-The parsed body of the request
-- serverRequest
+- **body**
+Parses the body of the request and returns it in json format
+- **serverRequest**
 The original Deno server request
 
 ### Response
 The response contains information about the response that will be sent back to the requestor.
 
 #### properties:
-- error
-- body
+- **error**
+Contains the error sent when calling next(error)
+- **body**
 The body of the response
-- headers
+- **headers**
 A Headers instance which contains the headers for the response
-- finished
+- **finished**
 A boolean indicating that the response is completed
-- sent
+- **sent**
 A boolean indicating that the response has been already sent to the requestor
-- send
+- **send**
 Sends the response to the requestor
-- redirect
+- **redirect**
 Redirects the user to another location
 
 ### Next

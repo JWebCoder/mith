@@ -1,16 +1,23 @@
-import { Mith, Request, Response, NextFunction } from './mod.ts'
+import { Mith, NextFunction, Request, Response } from './mod.ts'
 
 const app = new Mith()
 
 app.use(async (req: Request, res: Response, next: NextFunction) => {
-  if (req.body.type === 'error') {
-    return next(new Error('error'))
+  const body = await req.body()
+  switch (body.type) {
+    case 'error':
+      return next(new Error('error'))
+    case 'redirect':
+      res.redirect('/')
+      break
+    case 'urlencoded':
+    case 'json':
+      res.body.test = body.type
+      break
+    default:
+      res.body.test = body
   }
-  if (req.body.type === 'redirect') {
-    res.redirect('/')
-  } else {
-    res.body.test = 'test'
-  }
+
   next()
 })
 app.error(
