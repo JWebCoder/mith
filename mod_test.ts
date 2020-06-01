@@ -1,15 +1,38 @@
 import {
   assert,
   assertEquals,
-  assertStrictEq,
 } from "https://deno.land/std@v0.53.0/testing/asserts.ts"
+import { existsSync } from 'https://deno.land/std@0.53.0/fs/mod.ts'
 
-Deno.test("server is created", async () => {
+const afterFile = './after.dat'
+
+export async function test(name: string, fn: () => void | Promise<void>) {
+  async function wrapped() {
+    if (existsSync(afterFile)) {
+      Deno.removeSync(afterFile)
+    }
+    try {
+      await fn();
+      if (existsSync(afterFile)) {
+        const decoder = new TextDecoder('utf-8')
+        const data = Deno.readFileSync(afterFile)
+        console.log(decoder.decode(data))  
+      }
+    } finally {
+      if (existsSync(afterFile)) {
+        Deno.removeSync(afterFile)
+      }
+    }
+  }
+  Deno.test({ name, fn: wrapped })
+}
+
+test("server is created", async () => {
   const { default: app } = await import('./app_test.ts')
   assert(app, 'is not created')
 })
 
-Deno.test("simple server setup test", async () => {
+test("simple server setup test", async () => {
   const { default: app } = await import('./app_test.ts')
   app.listen({ port: 8000})
   const response = await fetch(
@@ -28,9 +51,10 @@ Deno.test("simple server setup test", async () => {
   const result = await response.json()
   app.close()
   assertEquals(result.test, 'json')
+  assertEquals(result.before, true)
 })
 
-Deno.test("urlenconded request", async () => {
+test("urlenconded request", async () => {
   const { default: app } = await import('./app_test.ts')
   app.listen({ port: 8000})
   const response = await fetch(
@@ -48,7 +72,7 @@ Deno.test("urlenconded request", async () => {
   assertEquals(result.test, 'urlencoded')
 })
 
-Deno.test("test request", async () => {
+test("test request", async () => {
   const { default: app } = await import('./app_test.ts')
   app.listen({ port: 8000})
   const response = await fetch(
@@ -66,7 +90,7 @@ Deno.test("test request", async () => {
   assertEquals(result.test, 'text')
 })
 
-Deno.test("request with error", async () => {
+test("request with error", async () => {
   const { default: app } = await import('./app_test.ts')
   app.listen({ port: 8000})
   const response = await fetch(
@@ -86,7 +110,7 @@ Deno.test("request with error", async () => {
   assertEquals(result, 'error')
 })
 
-Deno.test("redirect", async () => {
+test("redirect", async () => {
   const { default: app } = await import('./app_test.ts')
   app.listen({ port: 8000})
   const response = await fetch(
@@ -106,7 +130,7 @@ Deno.test("redirect", async () => {
   assertEquals(response.type, 'opaqueredirect')
 })
 
-Deno.test("application closes", async () => {
+test("application closes", async () => {
   const { default: app } = await import('./app_test.ts')
   app.listen({ port: 8000})
   await app.close()

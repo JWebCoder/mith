@@ -74,15 +74,20 @@ export class Response implements IResponse{
    * @return void
    */
   public async sendResponse() {
+    let body = this.body
     if (!this.sent) {
       this.sent = true
       if (typeof this.body === 'object') {
         if (!this.headers.get('content-type')) {
           this.headers.set('content-type', 'application/json')
         }
-        this.body = JSON.stringify(this.body)
+        body = JSON.stringify(this.body)
       }
-      await this.request.respond(this).catch((e) => {console.log(e)})
+      await this.request.respond({
+        status: this.status,
+        headers: this.headers,
+        body,
+      }).catch((e) => {console.log(e)})
     }
   }
 }
