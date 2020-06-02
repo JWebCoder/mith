@@ -82,12 +82,24 @@ Right now I'm still working on the documentation, so you can check the **example
 
 ### app.before()
 
-These middleware runs 
+Intended to be used by middleware the enhances the request or response objects. Multipart body parser for example
 
+### app.main()
+
+Main business logic of the application goes here, routing definitions for example
+Using `app.use()` will default to the main stack if no stack is passed
+
+### app.error()
+
+This middleware stack will be triggered if the callback function next is called with an error: `next(something)`
+
+### app.after()
+
+This middleware stack runs after sending the response to the user, it's intended to be used with extra integrations that are not directly related to the user response. Analytics or logging for example.
 ## Middleware parameters
 
 ### Request
-The request contains information about the request received.
+The request contains information about the request received
 
 #### properties:
 - **body**
