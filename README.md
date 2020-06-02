@@ -27,24 +27,42 @@ import { Mith, NextFunction, Request, Response } from './mod.ts'
 
 const app = new Mith()
 
-app.use(async (req: Request, res: Response, next: NextFunction) => {
-  const body = await req.body()
-  switch (body.type) {
-    case 'error':
-      return next(new Error('error'))
-    case 'redirect':
-      res.redirect('/')
-      break
-    case 'urlencoded':
-    case 'json':
-      res.body.test = body.type
-      break
-    default:
-      res.body.test = body
+app.before(
+  async (req: Request, res: Response, next: NextFunction) => {
+    res.body.before = true
+    next()
   }
+)
 
-  next()
-})
+app.after(
+  (req: Request, res: Response, next: NextFunction) => {
+    const encoder = new TextEncoder();
+    Deno.writeFile('./after.dat', encoder.encode(`${Deno.pid} - ${JSON.stringify(res.body)}\n`), {append: true})
+    next()
+  }
+)
+
+app.use(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const body = await req.body()
+    switch (body.type) {
+      case 'error':
+        return next(new Error('error'))
+      case 'redirect':
+        res.redirect('/')
+        break
+      case 'urlencoded':
+      case 'json':
+        res.body.test = body.type
+        break
+      default:
+        res.body.test = body
+    }
+
+    next()
+  }
+)
+
 app.error(
   (req: Request, res: Response, next: NextFunction) => {
     res.status = res.error.status || 500
@@ -53,10 +71,18 @@ app.error(
   }
 )
 
-app.listen({ port: 8000})
+export default app
 ```
 
 Right now I'm still working on the documentation, so you can check the **example** folder for full usage examples
+
+## Multiple stacks
+
+![image](./mith.png)
+
+### app.before()
+
+These middleware runs 
 
 ## Middleware parameters
 

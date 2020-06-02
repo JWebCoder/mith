@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" contentScriptType="application/ecmascript" contentStyleType="text/css" height="610px" preserveAspectRatio="none" style="width:348px;height:610px;" version="1.1" viewBox="0 0 348 610" width="348px" zoomAndPan="magnify"><defs><filter height="300%" id="f92bpd0fyk4mf" width="300%" x="-1" y="-1"><feGaussianBlur result="blurOut" stdDeviation="2.0"/><feColorMatrix in="blurOut" result="blurOut2" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .4 0"/><feOffset dx="4.0" dy="4.0" in="blurOut2" result="blurOut3"/><feBlend in="SourceGraphic" in2="blurOut3" mode="normal"/></filter></defs><g><ellipse cx="171" cy="18" fill="#000000" filter="url(#f92bpd0fyk4mf)" rx="10" ry="10" style="stroke: none; stroke-width: 1.0;"/><rect fill="#FEFECE" filter="url(#f92bpd0fyk4mf)" height="511.2969" rx="12.5" ry="12.5" style="stroke: #A80036; stroke-width: 1.5;" width="330" x="6" y="88"/><rect fill="#FFFFFF" height="479" rx="12.5" ry="12.5" style="stroke: #FFFFFF; stroke-width: 1.0;" width="324" x="9" y="117.2969"/><line style="stroke: #A80036; stroke-width: 1.5;" x1="6" x2="336" y1="114.2969" y2="114.2969"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="32" x="155" y="105.9951">Mith</text><g id="before"><rect fill="#FEFECE" filter="url(#f92bpd0fyk4mf)" height="50" rx="12.5" ry="12.5" style="stroke: #A80036; stroke-width: 1.5;" width="114" x="188.5" y="184.2969"/><line style="stroke: #A80036; stroke-width: 1.5;" x1="188.5" x2="302.5" y1="210.5938" y2="210.5938"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="94" x="198.5" y="202.292">Before Stack</text></g><g id="main"><rect fill="#FEFECE" filter="url(#f92bpd0fyk4mf)" height="50" rx="12.5" ry="12.5" style="stroke: #A80036; stroke-width: 1.5;" width="98" x="95.5" y="287.2969"/><line style="stroke: #A80036; stroke-width: 1.5;" x1="95.5" x2="193.5" y1="313.5938" y2="313.5938"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="78" x="105.5" y="305.292">Main Stack</text></g><g id="error"><rect fill="#FEFECE" filter="url(#f92bpd0fyk4mf)" height="50" rx="12.5" ry="12.5" style="stroke: #A80036; stroke-width: 1.5;" width="101" x="17" y="184.2969"/><line style="stroke: #A80036; stroke-width: 1.5;" x1="17" x2="118" y1="210.5938" y2="210.5938"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="81" x="27" y="202.292">Error Stack</text></g><g id="send"><rect fill="#FEFECE" filter="url(#f92bpd0fyk4mf)" height="50" rx="12.5" ry="12.5" style="stroke: #A80036; stroke-width: 1.5;" width="126" x="31.5" y="390.2969"/><line style="stroke: #A80036; stroke-width: 1.5;" x1="31.5" x2="157.5" y1="416.5938" y2="416.5938"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="106" x="41.5" y="408.292">Send response</text></g><g id="after"><rect fill="#FEFECE" filter="url(#f92bpd0fyk4mf)" height="50" rx="12.5" ry="12.5" style="stroke: #A80036; stroke-width: 1.5;" width="103" x="43" y="477.2969"/><line style="stroke: #A80036; stroke-width: 1.5;" x1="43" x2="146" y1="503.5938" y2="503.5938"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="83" x="53" y="495.292">After Stack</text></g><ellipse cx="245.5" cy="137.2969" fill="#000000" filter="url(#f92bpd0fyk4mf)" rx="10" ry="10" style="stroke: none; stroke-width: 1.0;"/><ellipse cx="94.5" cy="574.2969" fill="none" filter="url(#f92bpd0fyk4mf)" rx="10" ry="10" style="stroke: #000000; stroke-width: 1.0;"/><ellipse cx="95" cy="574.7969" fill="#000000" rx="6" ry="6" style="stroke: none; stroke-width: 1.0;"/><!--MD5=[3d2ff133d6d41e25a56eeb2f190c5662]
+link *start*mith to before--><path d="M245.5,147.4479 C245.5,155.4829 245.5,167.6229 245.5,178.9509 " fill="none" id="*start*mith-&gt;before" style="stroke: #A80036; stroke-width: 1.0;"/><polygon fill="#A80036" points="245.5,184.0809,249.5,175.0809,245.5,179.0809,241.5,175.0809,245.5,184.0809" style="stroke: #A80036; stroke-width: 1.0;"/><!--MD5=[7128ace0b4687b9f930f1f9c5363105f]
+link before to main--><path d="M221.308,234.4889 C206.674,249.1229 187.952,267.8449 172.655,283.1419 " fill="none" id="before-&gt;main" style="stroke: #A80036; stroke-width: 1.0;"/><polygon fill="#A80036" points="168.845,286.9519,178.0374,283.4163,172.3805,283.4163,172.3805,277.7595,168.845,286.9519" style="stroke: #A80036; stroke-width: 1.0;"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="33" x="201.5" y="265.3638">all ok</text><!--MD5=[29686fc0b45aecb4b73eea672b51aa2a]
+link main to send--><path d="M132.524,337.4889 C125.402,351.8749 116.3244,370.2119 108.8247,385.3609 " fill="none" id="main-&gt;send" style="stroke: #A80036; stroke-width: 1.0;"/><polygon fill="#A80036" points="106.5518,389.9519,114.1298,383.6611,108.7703,385.471,106.9604,380.1115,106.5518,389.9519" style="stroke: #A80036; stroke-width: 1.0;"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="33" x="123.5" y="368.3638">all ok</text><!--MD5=[7dd0a32c64206e50e047ea0b57261d0b]
+reverse link error to before--><path d="M123.23,209.2969 C143.927,209.2969 167.428,209.2969 188.257,209.2969 " fill="none" id="error&lt;-before" style="stroke: #A80036; stroke-width: 1.0;"/><polygon fill="#A80036" points="118.032,209.2969,127.032,213.2969,123.032,209.2969,127.032,205.2969,118.032,209.2969" style="stroke: #A80036; stroke-width: 1.0;"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="51" x="127.75" y="202.3638">on error</text><!--MD5=[488eee30d2377e6bc966019fda780e52]
+link main to error--><path d="M125.94,286.9519 C114.857,272.4149 100.7287,253.8829 89.14,238.6819 " fill="none" id="main-&gt;error" style="stroke: #A80036; stroke-width: 1.0;"/><polygon fill="#A80036" points="85.9434,234.4889,88.2189,244.0713,88.9748,238.4651,94.5809,239.221,85.9434,234.4889" style="stroke: #A80036; stroke-width: 1.0;"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="51" x="112.5" y="265.3638">on error</text><!--MD5=[ca8483dcc42f01f0b7f4d42a7f2ed30b]
+link error to send--><path d="M70.7033,234.4999 C75.6764,272.0739 85.2392,344.3269 90.6044,384.8639 " fill="none" id="error-&gt;send" style="stroke: #A80036; stroke-width: 1.0;"/><polygon fill="#A80036" points="91.3009,390.1259,94.086,380.679,90.6452,385.1691,86.1551,381.7282,91.3009,390.1259" style="stroke: #A80036; stroke-width: 1.0;"/><!--MD5=[8b5a4cb324f5356630989b9c4952f9ab]
+link send to after--><path d="M94.5,440.4269 C94.5,450.2069 94.5,461.5949 94.5,471.8569 " fill="none" id="send-&gt;after" style="stroke: #A80036; stroke-width: 1.0;"/><polygon fill="#A80036" points="94.5,477.1059,98.5,468.1059,94.5,472.1059,90.5,468.1059,94.5,477.1059" style="stroke: #A80036; stroke-width: 1.0;"/><!--MD5=[f1e7329e733360a17895575f680df66f]
+link after to *end*mith--><path d="M94.5,527.3869 C94.5,537.8671 94.5,549.7974 94.5,558.8691 " fill="none" id="after-&gt;*end*mith" style="stroke: #A80036; stroke-width: 1.0;"/><polygon fill="#A80036" points="94.5,564.1097,98.5,555.1097,94.5,559.1097,90.5,555.1097,94.5,564.1097" style="stroke: #A80036; stroke-width: 1.0;"/><!--MD5=[ed41372ea6326727a9ffa8cb72f5db3d]
+link *start to mith--><path d="M171,28.333 C171,39.117 171,58.502 171,82.545 " fill="none" id="*start-&gt;mith" style="stroke: #A80036; stroke-width: 1.0;"/><polygon fill="#A80036" points="171,87.745,175,78.745,171,82.745,167,78.745,171,87.745" style="stroke: #A80036; stroke-width: 1.0;"/><!--MD5=[d5dde8be7c08118a65183f1c46964dfe]
+@startuml
+[*] - -> mith
+
+State "Mith" as mith {
+    State "Before Stack" as before
+    State "Main Stack" as main
+    State "Error Stack" as error
+    State "Send response" as send
+    State "After Stack" as after
+    
+    [*] -down-> before
+    before -down-> main : all ok
+    main -down-> send : all ok
+    
+    before -left> error : on error
+    main -down-> error : on error
+    
+    error -down-> send
+    
+    send -down-> after
+    after -down-> [*]
+
+}
+@enduml
+
+PlantUML version 1.2020.11(Sat May 30 10:13:43 UTC 2020)
+(GPL source distribution)
+Java Runtime: Java(TM) SE Runtime Environment
+JVM: Java HotSpot(TM) 64-Bit Server VM
+Default Encoding: UTF-8
+Language: en
+Country: US
+--></g></svg>

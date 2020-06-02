@@ -5,27 +5,52 @@ export type NextFunction = (err?: any) => void
 
 export type Middleware  = (request: Request | any, response: Response | any, next: NextFunction) => void
 
+type MiddlewareStacks =  {
+  before: Middleware [],
+  after: Middleware [],
+  main: Middleware [],
+  error: Middleware [],
+}
+type Stacks = 'before' | 'after' | 'main' | 'error'
 /**
  * A class which registers middleware (via `.use()`) and then processes
  * inbound requests against that middleware (via `.listen()`).
  */
 export class Mith {
-  private middlewareArray: Middleware[] = []
-  private errorMiddlewareArray: Middleware[] = []
+  private middlewareStacks: MiddlewareStacks = {
+    before: [],
+    after: [],
+    main: [],
+    error: []
+  }
   private PORT = 8000
   public server?: Server
 
   /**
-   * Register middleware to be used with the application.
+   * Register middleware on the before stack.
    * @param Middleware can be a single one or an array
    * @return void
   */
-  public use(middleware: Middleware | Middleware[]) {
-    if (Array.isArray(middleware)) {
-      this.middlewareArray.push(...middleware)
-    } else {
-      this.middlewareArray.push(middleware)
-    }
+  public before(middleware: Middleware | Middleware[]) {
+    this.use(middleware, 'before')
+  }
+
+  /**
+     * Register middleware on the after stack.
+     * @param Middleware can be a single one or an array
+     * @return void
+    */
+  public after(middleware: Middleware | Middleware[]) {
+    this.use(middleware, 'after')
+  }
+
+  /**
+   * Register middleware on the main stack.
+   * @param Middleware can be a single one or an array
+   * @return void
+  */
+  public main(middleware: Middleware | Middleware[]) {
+    this.use(middleware, 'main')
   }
 
   /**
@@ -34,13 +59,22 @@ export class Mith {
    * @return void
   */
   public error(middleware: Middleware | Middleware[]) {
+    this.use(middleware, 'error')
+  }
+
+  /**
+   * Register middleware to be used with the application.
+   * @param Middleware can be a single one or an array
+   * @return void
+  */
+  public use(middleware: Middleware | Middleware[], stack: Stacks = 'main') {
     if (Array.isArray(middleware)) {
-      this.errorMiddlewareArray.push(...middleware)
+      this.getMiddlewareArray(stack).push(...middleware)
     } else {
-      this.errorMiddlewareArray.push(middleware)
+      this.getMiddlewareArray(stack).push(middleware)
     }
   }
-  
+
   /**
    * Create an HTTP server with given options
    *
@@ -76,7 +110,7 @@ export class Mith {
   private async setupListener() {
     if (this.server) {
       for await (const req of this.server) {
-        this.dispatch(new Request(req), new Response(req), 'main')
+        this.dispatch(new Request(req), new Response(req), 'before')
       }
     }
   }
@@ -91,10 +125,13 @@ export class Mith {
    * @param next function can be passed to cicle between Mith apps
    * @return void
    */
-  public async dispatch (request: Request, response: Response, stack: string, index: number = 0, next?: NextFunction): Promise<void> {
+  public async dispatch (request: Request, response: Response, stack: Stacks, index: number = 0, next?: NextFunction): Promise<void> {
     let nextCalled = false
     let middleWare = this.getMiddlewareArray(stack)
-    
+    if (!middleWare.length) {
+      this.dispatch(request, response, this.nextStack(stack), 0, next)
+      return
+    }
     await middleWare[index](
       request,
       response,
@@ -108,12 +145,8 @@ export class Mith {
     }
   }
 
-  private getMiddlewareArray(stack: string) {
-    switch (stack) {
-      case 'error':
-        return this.errorMiddlewareArray
-    }
-    return this.middlewareArray
+  private getMiddlewareArray(stack: Stacks) {
+    return this.middlewareStacks[stack]
   }
 
   /**
@@ -128,26 +161,37 @@ export class Mith {
    * @param error received from a callback
    * @return void
    */
-  private nextMiddleware(request: Request, response: Response, stack: string, index: number, next?: NextFunction, error?: any) {
+  private nextMiddleware(request: Request, response: Response, stack: Stacks, index: number, next?: NextFunction, error?: any) {
     if (response.finished) {
-      return this.sendOrNext(request, response, next, error)
+      return this.stackSendOrNext(request, response, stack, next, error)
     }
     if (error) {
       response.error = error
-      if (this.errorMiddlewareArray.length) {
+      if (this.getMiddlewareArray('error').length) {
         if (stack === 'error') {
-          if (index + 1 < this.middlewareArray.length) {
+          if (index + 1 < this.getMiddlewareArray('error').length) {
             return this.dispatch(request, response, stack, index + 1)
           }
         } else {
-          return this.dispatch(request, response, 'error', stack !== 'error' ? 0 : index)
+          return this.dispatch(request, response, 'error', 0)
         }
       }
-    } else if (index + 1 < this.middlewareArray.length) {
+    } else if (index + 1 < this.getMiddlewareArray(stack).length) {
       return this.dispatch(request, response, stack, index + 1)
     }
 
-    return this.sendOrNext(request, response, next, error)
+    return this.stackSendOrNext(request, response, stack, next, error)
+  }
+
+  /**
+   * Returns the next stack in line before > main > after || error > after
+   * @param stack current stack of the request
+   */
+  private nextStack(stack: Stacks) {
+    if (stack === 'before') {
+      return 'main'
+    }
+    return 'after'
   }
 
   /**
@@ -157,20 +201,25 @@ export class Mith {
    *
    * @param request Deno Server Request Object
    * @param response Mith Server Response Object
+   * @param stack on going middleware stack
    * @param next function can be passed to cicle between Mith apps
    * @param error in case of error, use it has the response body
    * @return void
    */
-  private sendOrNext(req: Request, res: Response, next?: NextFunction, error?: any) {
-    if (this.server) {
-      if (error) {
-        res.body = error
+  private stackSendOrNext(req: Request, res: Response,  stack: Stacks, next?: NextFunction, error?: any) {
+    if (stack === 'before') {
+      this.dispatch(req, res, this.nextStack(stack), 0, next)
+    } else if (stack === 'main' || stack === 'error') {
+      if (this.server) {
+        if (error) {
+          res.body = error
+        }
+        res.sendResponse()
       }
-      return res.sendResponse()
+      this.dispatch(req, res, this.nextStack(stack), 0, next)
     } else if (next) {
-      return next(error)
+      next(error)
     }
-    console.log('Request finished but no next middleware defined')
     return
   }
 }
