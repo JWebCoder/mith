@@ -3,7 +3,7 @@ import { Request, Response } from './mod.ts'
 
 export type NextFunction = (err?: any) => void
 
-export type Middleware  = (request: Request | any, response: Response | any, next: NextFunction) => void
+export type Middleware  = (request: Request, response: Response, next: NextFunction) => void
 
 type MiddlewareStacks =  {
   before: Middleware [],
@@ -125,11 +125,17 @@ export class Mith {
    * @param next function can be passed to cicle between Mith apps
    * @return void
    */
-  public async dispatch (request: Request, response: Response, stack: Stacks, index: number = 0, next?: NextFunction): Promise<void> {
+  public async dispatch (request: Request, response: Response, stack: Stacks, index: number = 0, next?: NextFunction, error?: any): Promise<void> {
     let nextCalled = false
     let middleWare = this.getMiddlewareArray(stack)
     if (!middleWare.length) {
-      this.dispatch(request, response, this.nextStack(stack), 0, next)
+      if (stack === 'after') {
+        if (next && error) {
+          next(error)
+        }
+        return
+      }
+      this.dispatch(request, response, this.nextStack(stack), 0, next, error)
       return
     }
     await middleWare[index](
@@ -141,7 +147,7 @@ export class Mith {
       }
     )
     if (!nextCalled) {
-      this.nextMiddleware(request, response, stack, index, next)
+      this.nextMiddleware(request, response, stack, index, next, error)
     }
   }
 
@@ -170,14 +176,14 @@ export class Mith {
       if (this.getMiddlewareArray('error').length) {
         if (stack === 'error') {
           if (index + 1 < this.getMiddlewareArray('error').length) {
-            return this.dispatch(request, response, stack, index + 1)
+            return this.dispatch(request, response, stack, index + 1, next, error)
           }
         } else {
-          return this.dispatch(request, response, 'error', 0)
+          return this.dispatch(request, response, 'error', 0, next, error)
         }
       }
     } else if (index + 1 < this.getMiddlewareArray(stack).length) {
-      return this.dispatch(request, response, stack, index + 1)
+      return this.dispatch(request, response, stack, index + 1, next)
     }
 
     return this.stackSendOrNext(request, response, stack, next, error)
@@ -208,7 +214,7 @@ export class Mith {
    */
   private stackSendOrNext(req: Request, res: Response,  stack: Stacks, next?: NextFunction, error?: any) {
     if (stack === 'before') {
-      this.dispatch(req, res, this.nextStack(stack), 0, next)
+      this.dispatch(req, res, error ? 'error' : this.nextStack(stack), 0, next, error)
     } else if (stack === 'main' || stack === 'error') {
       if (this.server) {
         if (error) {
@@ -216,7 +222,7 @@ export class Mith {
         }
         res.sendResponse()
       }
-      this.dispatch(req, res, this.nextStack(stack), 0, next)
+      this.dispatch(req, res, error && stack !== 'error' ? 'error' : this.nextStack(stack), 0, next, error)
     } else if (next) {
       next(error)
     }
