@@ -24,7 +24,7 @@ app.use(serveStatic(resolve(Deno.cwd(), 'static'), '/static', {
   maxage: 120,
 }))
 app.use(rootRouter.getRoutes())
-app.use((req: Request, res: Response, next: NextFunction) => {
+app.use((req, res, next) => {
   if (!req.requestHandled) {
     next({status: 404, message:'not found'})
   }

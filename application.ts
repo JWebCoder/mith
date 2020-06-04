@@ -4,9 +4,9 @@ import { Request, Response } from './mod.ts'
 export type NextFunction = (err?: any) => void
 
 export type Middleware<
-  Req extends Request = any,
-  Res extends Response = any,
-  Next extends NextFunction = any
+  Req extends Request = Request,
+  Res extends Response = Response,
+  Next extends NextFunction = NextFunction
 >  = (request: Req, response: Res, next: Next) => void
 
 type MiddlewareStacks =  {
@@ -71,7 +71,7 @@ export class Mith {
    * @param Middleware can be a single one or an array
    * @return void
   */
-  public use(middleware: Middleware | Middleware[], stack: Stacks = 'main') {
+  public use(middleware: Middleware<Request, Response, NextFunction> | Middleware<Request, Response, NextFunction>[], stack: Stacks = 'main') {
     if (Array.isArray(middleware)) {
       this.getMiddlewareArray(stack).push(...middleware)
     } else {
