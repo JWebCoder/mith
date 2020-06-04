@@ -3,7 +3,11 @@ import { Request, Response } from './mod.ts'
 
 export type NextFunction = (err?: any) => void
 
-export type Middleware  = (request: Request, response: Response, next: NextFunction) => void
+export type Middleware<
+  Req extends Request = any,
+  Res extends Response = any,
+  Next extends NextFunction = any
+>  = (request: Req, response: Res, next: Next) => void
 
 type MiddlewareStacks =  {
   before: Middleware [],
