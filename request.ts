@@ -26,7 +26,7 @@ export class Request implements IRequest{
     return this.parsedBody
   }
 
-  hasBody(): boolean {
+  private hasBody(): boolean {
     return (
       this.serverRequest.headers.get("transfer-encoding") !== null ||
       !!parseInt(this.serverRequest.headers.get("content-length") ?? "")

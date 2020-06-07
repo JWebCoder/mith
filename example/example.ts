@@ -1,4 +1,14 @@
-import { debug, Mith, cookieSession, serveStatic, resolve, mithCors } from './deps.ts'
+import {
+  debug,
+  Mith,
+  cookieSession,
+  serveStatic,
+  resolve,
+  mithCors,
+  Request,
+  Response,
+  NextFunction
+} from './deps.ts'
 import rootRouter from './routes/root.ts'
 
 const { env } = Deno
@@ -6,10 +16,10 @@ const logger = debug('*')
 
 const app = new Mith()
 
-app.use(cookieSession({
+app.before(cookieSession({
   secret:'stuff'
 }))
-app.use(mithCors()); // Enable CORS for All Routes
+app.before(mithCors()); // Enable CORS for All Routes
 app.use(serveStatic(resolve(Deno.cwd(), 'static'), '/static', {
   maxage: 120,
 }))
@@ -20,7 +30,7 @@ app.use((req, res, next) => {
   }
 })
 app.error(
-  (req, res, next) => {
+  (req: Request, res: Response, next: NextFunction) => {
     if (res.error) {
       res.status = res.error.status || 500
       res.body = res.error.message
