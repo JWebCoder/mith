@@ -13,7 +13,7 @@ Differently from Express, the main Mith application is only responsible to handl
 
 - **[mith_router](https://github.com/JWebCoder/mith_router)** - router middleware
 - **cookieSession.ts** - session middleware using cookies
-- **static.ts** - static file server (WIP)
+- **[mith_static](https://github.com/JWebCoder/mith_static)** - static file server
 
 **Note:** These middlewares will eventually move to their own repositories to split responsibilities and improve maintenance
 
@@ -21,9 +21,9 @@ Differently from Express, the main Mith application is only responsible to handl
 
 ## Usage
 
-**Basic integration with routing**
+**Basic integration**
 ```typescript
-import { Mith, NextFunction, Request, Response } from './mod.ts'
+import { Mith, NextFunction, Request, Response } from 'https://deno.land/x/mith@v0.7.0/mod.ts'
 
 const app = new Mith()
 
