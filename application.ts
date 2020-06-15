@@ -73,9 +73,9 @@ export class Mith {
   */
   public use(middleware: Middleware<Request, Response, NextFunction> | Middleware<Request, Response, NextFunction>[], stack: Stacks = 'main') {
     if (Array.isArray(middleware)) {
-      this.getMiddlewareArray(stack).push(...middleware)
+      this.getMiddlewareStack(stack).push(...middleware)
     } else {
-      this.getMiddlewareArray(stack).push(middleware)
+      this.getMiddlewareStack(stack).push(middleware)
     }
   }
 
@@ -129,9 +129,8 @@ export class Mith {
    * @param next function can be passed to cicle between Mith apps
    * @return void
    */
-  public async dispatch (request: Request, response: Response, stack: Stacks, index: number = 0, next?: NextFunction, error?: any): Promise<void> {
-    let nextCalled = false
-    let middleWare = this.getMiddlewareArray(stack)
+  public dispatch (request: Request, response: Response, stack: Stacks, index: number = 0, next?: NextFunction, error?: any): void {
+    let middleWare = this.getMiddlewareStack(stack)
     if (!middleWare.length) {
       if (stack === 'after') {
         if (next && error) {
@@ -142,21 +141,23 @@ export class Mith {
       this.dispatch(request, response, this.nextStack(stack), 0, next, error)
       return
     }
-    await middleWare[index](
+    middleWare[index](
       request,
       response,
       (error?: any): void => {
-        nextCalled = true
         this.nextMiddleware(request, response, stack, index, next, error)
       }
     )
-    if (!nextCalled) {
-      this.nextMiddleware(request, response, stack, index, next, error)
-    }
   }
 
-  private getMiddlewareArray(stack: Stacks) {
-    return this.middlewareStacks[stack]
+  /**
+   * getMiddlewareStack based on the requested stack returns the correct middleware items
+   *
+   * @param stack String representing the stack
+   * @return Array of middlewares
+   */
+  private getMiddlewareStack(stack: Stacks) {
+    return this.middlewareStacks[stack] || []
   }
 
   /**
@@ -177,16 +178,16 @@ export class Mith {
     }
     if (error) {
       response.error = error
-      if (this.getMiddlewareArray('error').length) {
+      if (this.getMiddlewareStack('error').length) {
         if (stack === 'error') {
-          if (index + 1 < this.getMiddlewareArray('error').length) {
+          if (index + 1 < this.getMiddlewareStack('error').length) {
             return this.dispatch(request, response, stack, index + 1, next, error)
           }
         } else {
           return this.dispatch(request, response, 'error', 0, next, error)
         }
       }
-    } else if (index + 1 < this.getMiddlewareArray(stack).length) {
+    } else if (index + 1 < this.getMiddlewareStack(stack).length) {
       return this.dispatch(request, response, stack, index + 1, next)
     }
 
