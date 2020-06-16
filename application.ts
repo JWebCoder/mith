@@ -1,11 +1,11 @@
 import { serve, Server, HTTPOptions } from './deps.ts'
-import { Request, Response } from './mod.ts'
+import { Request, Response, IRequest, IResponse } from './mod.ts'
 
 export type NextFunction = (err?: any) => void
 
 export type Middleware<
-  Req extends Request = Request,
-  Res extends Response = Response,
+  Req extends IRequest = IRequest,
+  Res extends IResponse = IResponse,
   Next extends NextFunction = NextFunction
 >  = (request: Req, response: Res, next: Next) => void
 
@@ -71,7 +71,7 @@ export class Mith {
    * @param Middleware can be a single one or an array
    * @return void
    */
-  public use(middleware: Middleware<Request, Response, NextFunction> | Middleware<Request, Response, NextFunction>[], stack: Stacks = 'main') {
+  public use(middleware: Middleware | Middleware[], stack: Stacks = 'main') {
     if (Array.isArray(middleware)) {
       this.getMiddlewareStack(stack).push(...middleware)
     } else {
@@ -129,7 +129,7 @@ export class Mith {
    * @param next function can be passed to cicle between Mith apps
    * @return void
    */
-  public dispatch (request: Request, response: Response, stack: Stacks, index: number = 0, next?: NextFunction, error?: any): void {
+  public dispatch (request: IRequest, response: IResponse, stack: Stacks, index: number = 0, next?: NextFunction, error?: any): void {
     let middleWare = this.getMiddlewareStack(stack)
     if (!middleWare.length) {
       if (stack === 'after') {
@@ -172,7 +172,7 @@ export class Mith {
    * @param error received from a callback
    * @return void
    */
-  private nextMiddleware(request: Request, response: Response, stack: Stacks, index: number, next?: NextFunction, error?: any) {
+  private nextMiddleware(request: IRequest, response: IResponse, stack: Stacks, index: number, next?: NextFunction, error?: any) {
     if (response.finished) {
       return this.stackSendOrNext(request, response, stack, next, error)
     }
@@ -217,7 +217,7 @@ export class Mith {
    * @param error in case of error, use it has the response body
    * @return void
    */
-  private stackSendOrNext(req: Request, res: Response,  stack: Stacks, next?: NextFunction, error?: any) {
+  private stackSendOrNext(req: IRequest, res: IResponse,  stack: Stacks, next?: NextFunction, error?: any) {
     if (stack === 'before') {
       this.dispatch(req, res, error ? 'error' : this.nextStack(stack), 0, next, error)
     } else if (stack === 'main' || stack === 'error') {

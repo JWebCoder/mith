@@ -26,6 +26,7 @@ export interface IResponse extends DenoResponse {
     url: string | URL | typeof REDIRECT_BACK,
     alt?: string | URL
   ) => void
+  [key: string]: any
 }
 
 /**
