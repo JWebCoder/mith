@@ -1,5 +1,4 @@
 import {
-  debug,
   Mith,
   cookieSession,
   serveStatic,
@@ -12,7 +11,6 @@ import {
 import rootRouter from './routes/root.ts'
 
 const { env } = Deno
-const logger = debug('*')
 
 const app = new Mith()
 
@@ -39,6 +37,5 @@ app.error(
   }
 )
 
-const PORT = Number(env.get('PORT')) || 8000
 
 export default app

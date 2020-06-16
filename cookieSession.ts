@@ -10,10 +10,10 @@ import { Middleware, Response, Request, NextFunction } from "./mod.ts"
 import debug from 'https://deno.land/x/debuglog/debug.ts'
 let logger = debug('cookie_session')
 
-type keyTypes = string | number
+type keyTypes = string
 
 type session = {
-  [key in keyTypes]: any
+  [key: string]: any
 }
 
 export interface options {
@@ -67,7 +67,7 @@ export function cookieSession (options: options): Middleware {
     logger('running')
     let authString = getCookies(req.serverRequest)[(configurationOptions.name as string)]
     
-    let authData: {[key: string]: any} = {}
+    let authData: session = {}
     logger('authString %s', authString)
     if (authString) {
       authData = JSON.parse(authString)
@@ -76,14 +76,14 @@ export function cookieSession (options: options): Middleware {
       authData.id = v4.generate()
     }
     const handler = {
-      get: (target: {[key: string]: any}, property: string): any => {1
+      get: (target: session, property: string): session | string | number => {
         if (typeof target[property] === 'object' && target[property] !== null) {
           return new Proxy(target[property], handler)
         } else {
           return target[property];
         }
       },
-      set: (target: {[key: string]: any}, property: string, newValue: any) => {
+      set: (target: session, property: string, newValue: session | string | number) => {
         target[property] = newValue
         setCookie(res, {
           name: (configurationOptions.name as string),

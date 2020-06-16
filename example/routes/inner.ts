@@ -13,7 +13,7 @@ innerRouter.use('GET', '/test/:name', deepRouter.getRoutes())
 innerRouter.use('GET', '/', (req, res, next) => {
   res.body.test = '/'
   res.body.params = req.params
-  res.send()
+  next()
 })
 
 export default innerRouter
