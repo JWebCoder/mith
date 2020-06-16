@@ -133,7 +133,7 @@ export class Mith {
     let middleWare = this.getMiddlewareStack(stack)
     if (!middleWare.length) {
       if (stack === 'after') {
-        if (next && error) {
+        if (next) {
           next(error)
         }
         return
