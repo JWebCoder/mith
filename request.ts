@@ -4,6 +4,7 @@ import { bodyParser, Body } from './bodyParser.ts'
 export interface IRequest {
   body: () => Promise<Body | undefined>
   serverRequest: ServerRequest
+  [key: string]: any
 }
 
 /**
