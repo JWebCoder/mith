@@ -34,16 +34,16 @@ export class Mith {
    * Register middleware on the before stack.
    * @param Middleware can be a single one or an array
    * @return void
-  */
+   */
   public before(middleware: Middleware | Middleware[]) {
     this.use(middleware, 'before')
   }
 
   /**
-     * Register middleware on the after stack.
-     * @param Middleware can be a single one or an array
-     * @return void
-    */
+   * Register middleware on the after stack.
+   * @param Middleware can be a single one or an array
+   * @return void
+   */
   public after(middleware: Middleware | Middleware[]) {
     this.use(middleware, 'after')
   }
@@ -52,7 +52,7 @@ export class Mith {
    * Register middleware on the main stack.
    * @param Middleware can be a single one or an array
    * @return void
-  */
+   */
   public main(middleware: Middleware | Middleware[]) {
     this.use(middleware, 'main')
   }
@@ -61,7 +61,7 @@ export class Mith {
    * Register middleware to be used when next(error) is called.
    * @param Middleware can be a single one or an array
    * @return void
-  */
+   */
   public error(middleware: Middleware | Middleware[]) {
     this.use(middleware, 'error')
   }
@@ -70,7 +70,7 @@ export class Mith {
    * Register middleware to be used with the application.
    * @param Middleware can be a single one or an array
    * @return void
-  */
+   */
   public use(middleware: Middleware<Request, Response, NextFunction> | Middleware<Request, Response, NextFunction>[], stack: Stacks = 'main') {
     if (Array.isArray(middleware)) {
       this.getMiddlewareStack(stack).push(...middleware)

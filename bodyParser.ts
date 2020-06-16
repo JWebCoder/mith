@@ -1,5 +1,8 @@
 import { ServerRequest} from "https://deno.land/std@0.53.0/http/server.ts";
 
+/**
+ * Supported content types on the request headers 
+ */
 const CONTENT_TYPES: {
   [key: string]: string | undefined
 } = {
@@ -9,10 +12,16 @@ const CONTENT_TYPES: {
   'raw': undefined
 }
 
-type Body = {
-  [key: string]: any
+export type Body = {
+  [key: string]: Body | number
 } | string
 
+/**
+ * Parses the body of a request into a JSON format
+ * Currently only JSON and urlencoded optiosn are supported
+ * @param request Deno request object
+ * @return Promise<undefined | Body> 
+ */
 export async function bodyParser(req: ServerRequest): Promise<undefined | Body> {
   let body: Body | undefined
   const contentType = CONTENT_TYPES[req.headers.get("content-type")?.split(';')[0] || 'raw']
@@ -22,16 +31,18 @@ export async function bodyParser(req: ServerRequest): Promise<undefined | Body> 
     return rawBody
   }
   switch (contentType) {
-    case 'json':
+    case 'json': {
       body = JSON.parse(rawBody)
       break;
-    case 'urlencoded':
+    }
+    case 'urlencoded': {
       const searchParams = new URLSearchParams(rawBody.replace(/\+/g, " "))
       body = {}
       for (var pair of searchParams.entries()) {
         body[pair[0]] = pair[1]
       }
       break;
+    }
     default:
       body = rawBody
       break;

@@ -21,36 +21,35 @@ export interface IResponse extends DenoResponse {
   headers: Headers
   finished: boolean
   sent: boolean
-  send: () => void
+  sendResponse: () => void
   redirect: (
     url: string | URL | typeof REDIRECT_BACK,
     alt?: string | URL
   ) => void
 }
 
+/**
+ * This class represents the response object from Mith framework
+ */
 export class Response implements IResponse{
   error?: any
-  body: any
-  headers: Headers
-  finished: boolean
-  sent: boolean
-  status: number
+  body: any = {}
+  headers: Headers = new Headers()
+  finished: boolean = false
+  sent: boolean = false
+  status: number = 200
   private request: ServerRequest
 
   constructor(req: ServerRequest) {
     this.request = req
-    this.body = {}
-    this.headers = new Headers()
-    this.finished = false
-    this.sent = false
-    this.status = 200
   }
 
-  send() {
-    this.finished = true
-    return this
-  }
-
+  /**
+   * Redirects the user to the chosen URL
+   * @param url string or url or symbol redirect backwards
+   * @param alt string or url to be used in case of unexisting "Referrer" when redirecting the user backwards 
+   * @return void
+   */
   redirect(url: string | URL | typeof REDIRECT_BACK, alt: string | URL = "/") {
     if (url === REDIRECT_BACK) {
       url = this.request.headers.get("Referrer") ?? String(alt);
@@ -62,8 +61,7 @@ export class Response implements IResponse{
     this.status = 302;
     
     this.headers.set('Content-Type', 'text/plain; charset=utf-8')
-    this.body = `Redirecting to ${url}.`;
-    this.send()
+    this.body = this.body.length !== undefined && this.body.length !== 0 ? this.body : `Redirecting to ${url}.`
   }
 
   /**

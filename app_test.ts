@@ -20,20 +20,21 @@ app.after(
 app.use(
   async (req: Request, res: Response, next: NextFunction) => {
     const body = await req.body()
-    switch (body.type) {
-      case 'error':
-        return next(new Error('error'))
-      case 'redirect':
-        res.redirect('/')
-        break
-      case 'urlencoded':
-      case 'json':
-        res.body.test = body.type
-        break
-      default:
-        res.body.test = body
+    if (typeof body === 'object') {
+      switch (body.type) {
+        case 'error':
+          return next(new Error('error'))
+        case 'redirect':
+          res.redirect('/')
+          break
+        case 'urlencoded':
+        case 'json':
+          res.body.test = body.type
+          break
+      }
+    } else {
+      res.body.test = body
     }
-
     next()
   }
 )
