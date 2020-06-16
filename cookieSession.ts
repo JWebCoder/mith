@@ -76,7 +76,7 @@ export function cookieSession (options: options): Middleware {
       authData.id = v4.generate()
     }
     const handler = {
-      get: (target: session, property: string): session | string | number => {1
+      get: (target: session, property: string): session | string | number => {
         if (typeof target[property] === 'object' && target[property] !== null) {
           return new Proxy(target[property], handler)
         } else {
