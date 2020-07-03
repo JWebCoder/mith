@@ -1,5 +1,9 @@
 import { ServerRequest} from "https://deno.land/std@0.53.0/http/server.ts";
 
+export type Body = {
+  [key: string]: Body | number
+} | string
+
 /**
  * Supported content types on the request headers 
  */
@@ -12,9 +16,10 @@ const CONTENT_TYPES: {
   'raw': undefined
 }
 
-export type Body = {
-  [key: string]: Body | number
-} | string
+/**
+ * Regex for the query string parser, matches all characters after and including '?'
+ */
+const regex = new RegExp(/\?.+$/)
 
 /**
  * Parses the body of a request into a JSON format
@@ -49,4 +54,16 @@ export async function bodyParser(req: ServerRequest): Promise<undefined | Body> 
   }
   
   return body
+}
+
+/**
+ * Parses the query string of a request into an URLSearchParams object
+ * @param request Deno request object
+ * @return URLSearchParams | undefined
+ */
+export function queryParser(req: ServerRequest) {
+  const match = regex.exec(req.url)
+  if (match?.length) {
+    return new URLSearchParams(match[0])
+  }
 }

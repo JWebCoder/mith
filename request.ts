@@ -1,5 +1,5 @@
 import { ServerRequest } from "./deps.ts"
-import { bodyParser, Body } from './bodyParser.ts'
+import { bodyParser, Body, queryParser } from './bodyParser.ts'
 
 export interface IRequest {
   body: () => Promise<Body | undefined>
@@ -14,12 +14,15 @@ export class Request implements IRequest{
   serverRequest: ServerRequest
   [key: string]: any
   private hasBody: boolean
+  private hasQuery: boolean
   private parsedBody: Body | undefined = undefined
+  private parsedQuery: URLSearchParams | undefined = undefined
 
   constructor(req: ServerRequest) {
     this.serverRequest = req
     this.hasBody = req.headers.get("transfer-encoding") !== null ||
     !!parseInt(req.headers.get("content-length") ?? "")
+    this.hasQuery = req.url.indexOf('?') >= 0
   }
 
   /**
@@ -40,6 +43,17 @@ export class Request implements IRequest{
     }
     this.parsedBody = await bodyParser(this.serverRequest)
     return this.parsedBody
+  }
+
+  async query(): Promise<URLSearchParams | undefined> {
+    if (this.parsedQuery) {
+      return this.parsedQuery
+    }
+    if (!this.hasQuery) {
+      return undefined
+    }
+    this.parsedQuery = queryParser(this.serverRequest)
+    return this.parsedQuery
   }
 
   /**
