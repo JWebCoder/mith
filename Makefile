@@ -1,4 +1,4 @@
 test:
-	deno test --allow-read --allow-write --allow-net --unstable
+	deno test --unstable --allow-read --allow-net --allow-write
 
 .PHONY: test
