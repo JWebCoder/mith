@@ -7,10 +7,8 @@
 import { setCookie, getCookies } from "https://deno.land/std@0.57.0/http/cookie.ts"
 import { v4 } from "https://deno.land/std@0.57.0/uuid/mod.ts";
 import { Middleware, IResponse, IRequest, NextFunction } from "./mod.ts"
-import debug from 'https://deno.land/x/debuglog/debug.ts'
+import debug from 'https://raw.githubusercontent.com/rista404/deno-debug/75400f612c8051b1f57ecc5c037df9138507592a/debug.ts'
 let logger = debug('cookie_session')
-
-type keyTypes = string
 
 type session = {
   [key: string]: any
