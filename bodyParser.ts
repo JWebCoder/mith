@@ -1,4 +1,4 @@
-import { ServerRequest} from "https://deno.land/std@0.53.0/http/server.ts";
+import { ServerRequest} from './deps.ts';
 
 /**
  * Supported content types on the request headers 

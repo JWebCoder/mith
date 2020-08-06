@@ -4,9 +4,9 @@
  * MIT Licensed
  */
 
-import { setCookie, getCookies } from "https://deno.land/std@0.53.0/http/cookie.ts"
-import { v4 } from "https://deno.land/std@0.53.0/uuid/mod.ts";
-import { Middleware, Response, Request, NextFunction } from "./mod.ts"
+import { setCookie, getCookies } from "https://deno.land/std@0.57.0/http/cookie.ts"
+import { v4 } from "https://deno.land/std@0.57.0/uuid/mod.ts";
+import { Middleware, IResponse, IRequest, NextFunction } from "./mod.ts"
 import debug from 'https://deno.land/x/debuglog/debug.ts'
 let logger = debug('cookie_session')
 
@@ -63,7 +63,7 @@ export function cookieSession (options: options): Middleware {
   
   logger('session options %j', configurationOptions) 
 
-  return (req: Request, res: Response, next: NextFunction) => {
+  return (req: IRequest, res: IResponse, next: NextFunction) => {
     logger('running')
     let authString = getCookies(req.serverRequest)[(configurationOptions.name as string)]
     

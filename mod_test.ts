@@ -1,7 +1,7 @@
 import {
   assert,
   assertEquals,
-} from "https://deno.land/std@v0.53.0/testing/asserts.ts"
+} from "https://deno.land/std@v0.57.0/testing/asserts.ts"
 import { existsSync } from 'https://deno.land/std@0.53.0/fs/mod.ts'
 
 const afterFile = './after.dat'
@@ -16,7 +16,7 @@ export async function test(name: string, fn: () => void | Promise<void>) {
       if (existsSync(afterFile)) {
         const decoder = new TextDecoder('utf-8')
         const data = Deno.readFileSync(afterFile)
-        console.log(decoder.decode(data))  
+        console.log(decoder.decode(data))
       }
     } finally {
       if (existsSync(afterFile)) {
