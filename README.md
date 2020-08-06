@@ -102,8 +102,10 @@ This middleware stack runs after sending the response to the user, it's intended
 The request contains information about the request received
 
 #### properties:
-- **body**
+- **body()**
 Parses the body of the request and returns it in json format
+- **query()**
+Parses the query string of the request and returns an [URLSearchParams](https://developer.mozilla.org/docs/Web/API/URLSearchParams) object
 - **serverRequest**
 The original Deno server request
 
