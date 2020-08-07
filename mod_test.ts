@@ -1,8 +1,8 @@
 import {
   assert,
   assertEquals,
-} from "https://deno.land/std@v0.57.0/testing/asserts.ts"
-import { existsSync } from 'https://deno.land/std@0.53.0/fs/mod.ts'
+} from "https://deno.land/std@v0.63.0/testing/asserts.ts"
+import { existsSync } from 'https://deno.land/std@0.63.0/fs/mod.ts'
 
 const afterFile = './after.dat'
 
