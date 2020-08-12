@@ -3,6 +3,7 @@ import { bodyParser, Body, queryParser } from './bodyParser.ts'
 
 export interface IRequest {
   body: () => Promise<Body | undefined>
+  query: () => Promise<URLSearchParams | undefined>
   serverRequest: ServerRequest
   [key: string]: any
 }
