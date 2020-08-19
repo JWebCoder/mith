@@ -21,7 +21,7 @@ export interface IResponse extends DenoResponse {
   headers: Headers
   finished: boolean
   sent: boolean
-  sendResponse: () => void
+  sendResponse: () => Promise<boolean>
   redirect: (
     url: string | URL | typeof REDIRECT_BACK,
     alt?: string | URL
@@ -93,9 +93,12 @@ export class Response implements IResponse{
           return true
         }
       ).catch(
-        (e) => {console.log(e)}
-        )
+        (e) => {
+          console.log(e)
+          return false
+        }
+      )
     }
-    return
+    return false
   }
 }
