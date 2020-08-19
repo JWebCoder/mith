@@ -77,16 +77,25 @@ export class Response implements IResponse{
     if (!this.sent) {
       this.sent = true
       if (typeof this.body === 'object') {
-        if (!this.headers.get('content-type')) {
-          this.headers.set('content-type', 'application/json')
+        if (typeof body.read !== 'function') {
+          if (!this.headers.get('content-type')) {
+            this.headers.set('content-type', 'application/json')
+          }
+          body = JSON.stringify(this.body)
         }
-        body = JSON.stringify(this.body)
       }
-      await this.request.respond({
+      return this.request.respond({
         status: this.status,
         headers: this.headers,
         body,
-      }).catch((e) => {console.log(e)})
+      }).then(
+        () => {
+          return true
+        }
+      ).catch(
+        (e) => {console.log(e)}
+        )
     }
+    return
   }
 }
